@@ -1,0 +1,611 @@
+# SUB3_V2 TODO List
+
+**Last Updated**: 2025-01-10  
+**Current Phase**: Phase 0 - Data Quality Validation  
+**Overall Progress**: 25% (Documentation complete)
+
+---
+
+## 📋 Quick Status
+
+```
+✅ Documentation Complete (11 files, 76 KB)
+⏳ Phase 0: Data Quality (0/28 tasks)
+⏳ Phase 1: Preprocessing (0/24 tasks)
+⏳ Phase 2: Model Training (0/22 tasks)
+⏳ Phase 3: Evaluation (0/18 tasks)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total: 0/92 tasks complete (0%)
+```
+
+---
+
+## 🔴 HIGH PRIORITY - Start Here!
+
+### 🎯 Next Actions (Phase 0, Week 1)
+
+- [ ] **Day 1**: Setup annotation environment
+- [ ] **Days 2-5**: Annotate 100 workouts (20/day)
+- [ ] **Day 6**: Analyze annotations
+- [ ] **Day 7**: Implement quality filters
+
+---
+
+## ✅ Phase -1: Documentation (COMPLETE)
+
+### Documentation Files (11/11) ✅
+
+- [x] README.md (project overview)
+- [x] AGENTS.md (coding guidelines)
+- [x] ROADMAP.md (development roadmap)
+- [x] TODO.md (this file)
+- [x] PROJECT_SUMMARY.md (status snapshot)
+- [x] docs/PRD.md (product requirements)
+- [x] docs/ARCHITECTURE.md (technical specs)
+- [x] docs/DATA_QUALITY.md (quality criteria)
+- [x] docs/CHANGELOG.md (version history)
+- [x] docs/QUICK_START.md (getting started)
+- [x] Module READMEs (DATA, Preprocessing, Model)
+
+**Status**: ✅ 100% Complete (2025-01-10)
+
+---
+
+## ⏳ Phase 0: Data Quality Validation (0/28)
+
+**Goal**: Manually validate 100 workouts to establish quality baselines  
+**Duration**: Week 1 (7 days)  
+**Priority**: 🔴 HIGH
+
+### M0.1: Setup Annotation Environment (Day 1) - 0/6
+
+- [ ] Install dependencies
+  ```bash
+  pip install streamlit plotly pandas numpy matplotlib
+  ```
+- [ ] Create `EDA/quality_annotation_app.py` (Streamlit app)
+- [ ] Sample 100 workouts from `DATA/raw/endomondoHR.json`
+- [ ] Save sample to `DATA/quality_check/sample_workouts.json`
+- [ ] Test annotation app on 5 workouts
+- [ ] Fix any bugs in annotation workflow
+
+**Deliverables**:
+- `EDA/quality_annotation_app.py`
+- `DATA/quality_check/sample_workouts.json`
+
+**Time Estimate**: 3-4 hours
+
+---
+
+### M0.2: Manual Annotation (Days 2-5) - 0/5
+
+- [ ] **Day 2**: Annotate 20 workouts (1-20)
+- [ ] **Day 3**: Annotate 20 workouts (21-40)
+- [ ] **Day 4**: Annotate 20 workouts (41-60)
+- [ ] **Day 5**: Annotate 40 workouts (61-100)
+- [ ] Document common quality issues in notes
+
+**Annotation Checklist** (per workout):
+- Quality score (0-100 slider)
+- HR sensor quality (dropdown: Good/Spikes/Flatlines/Dropouts)
+- GPS quality (dropdown: Good/Noisy/Impossible speeds/Pauses)
+- Altitude quality (dropdown: Good/Jumps/Noisy)
+- Valid for training (checkbox)
+- Notes (text area)
+
+**Deliverables**:
+- `DATA/quality_check/annotations.csv` (100 rows)
+
+**Time Estimate**: 4 days × 1 hour = 4 hours total
+
+---
+
+### M0.3: Quality Analysis (Day 6) - 0/7
+
+- [ ] Load annotations CSV
+- [ ] Compute quality score distribution
+- [ ] Analyze quality grade breakdown (Excellent/Good/Acceptable/Poor)
+- [ ] Calculate % valid for training
+- [ ] Identify common failure modes
+- [ ] Establish quality thresholds
+- [ ] Generate quality report
+
+**Analysis Tasks**:
+```python
+# Quality distribution
+annotations['quality_score'].describe()
+annotations['grade'] = pd.cut(
+    annotations['quality_score'],
+    bins=[0, 30, 50, 70, 90, 100],
+    labels=['Very Poor', 'Poor', 'Acceptable', 'Good', 'Excellent']
+)
+
+# Common issues
+hr_issues = annotations['hr_quality'].value_counts()
+gps_issues = annotations['gps_quality'].value_counts()
+```
+
+**Deliverables**:
+- `DATA/quality_check/quality_report.md`
+- `DATA/quality_check/quality_distribution.png`
+
+**Time Estimate**: 2-3 hours
+
+---
+
+### M0.4: Implement Automated Filters (Day 7) - 0/10
+
+- [ ] Create `Preprocessing/quality_filters.py`
+- [ ] Implement `validate_hr_sensor()` function
+  - [ ] Check for spikes (>30 BPM/timestep)
+  - [ ] Check for flatlines (>10 identical values)
+  - [ ] Check for dropouts (HR=0 mid-workout)
+- [ ] Implement `validate_gps_speed()` function
+  - [ ] Check for impossible speeds (>25 km/h)
+  - [ ] Check for GPS noise (high std of speed_diff)
+- [ ] Implement `validate_altitude()` function
+  - [ ] Check for altitude jumps (>100m/timestep)
+  - [ ] Check for noise (high frequency oscillations)
+- [ ] Implement `validate_timestamps()` function
+  - [ ] Check monotonic increasing
+  - [ ] Check sampling regularity
+- [ ] Implement `validate_workout_quality()` wrapper
+- [ ] Test on annotated workouts (>80% agreement)
+- [ ] Write unit tests
+
+**Deliverables**:
+- `Preprocessing/quality_filters.py` (200-300 lines)
+- Unit tests
+
+**Time Estimate**: 4-5 hours
+
+---
+
+**Phase 0 Summary**: 0/28 tasks (0%)  
+**Estimated Time**: ~15-20 hours over 7 days
+
+---
+
+## ⏳ Phase 1: Preprocessing Pipeline (0/24)
+
+**Goal**: Transform raw data into PyTorch tensors with engineered features  
+**Duration**: Week 2 (7 days)  
+**Priority**: 🟡 MEDIUM (after Phase 0)
+
+### M1.1: Feature Engineering (Days 8-9) - 0/10
+
+- [ ] Create `Preprocessing/feature_engineering.py`
+- [ ] Implement lag features
+  - [ ] `create_lag_feature()` helper function
+  - [ ] speed_lag_2
+  - [ ] speed_lag_5
+  - [ ] altitude_lag_30
+- [ ] Implement derivative features
+  - [ ] speed_derivative (np.diff)
+  - [ ] altitude_derivative
+- [ ] Implement rolling statistics
+  - [ ] rolling_speed_10 (pandas rolling)
+  - [ ] rolling_speed_30
+- [ ] Implement cumulative features
+  - [ ] cumulative_elevation (cumsum of positive altitude_derivative)
+- [ ] Write unit tests for each feature
+- [ ] Test on sample workout
+
+**Deliverables**:
+- `Preprocessing/feature_engineering.py` (150-200 lines)
+- Unit tests
+
+**Time Estimate**: 4-5 hours
+
+---
+
+### M1.2: Main Preprocessing Pipeline (Days 10-11) - 0/10
+
+- [ ] Create `Preprocessing/prepare_sequences.py`
+- [ ] Implement data loading
+  - [ ] Load raw JSON
+  - [ ] Apply quality filters
+  - [ ] Track filtering statistics
+- [ ] Implement feature engineering integration
+  - [ ] Call `engineer_features()` for each workout
+  - [ ] Concatenate base + engineered features
+- [ ] Implement padding with masking
+  - [ ] `pad_or_truncate_with_mask()` function
+  - [ ] Generate validity masks (1=valid, 0=padded)
+- [ ] Implement stratified user splitting
+  - [ ] Compute user fitness levels (avg HR)
+  - [ ] Stratify by fitness quartile
+  - [ ] Split users 70/15/15
+- [ ] Implement normalization
+  - [ ] Fit StandardScaler on train data only
+  - [ ] Apply to all splits
+  - [ ] Keep HR unnormalized
+- [ ] Implement tensor conversion
+  - [ ] features: [N, 500, 11]
+  - [ ] heart_rate: [N, 500, 1]
+  - [ ] mask: [N, 500, 1]
+- [ ] Save preprocessed data
+  - [ ] train.pt, val.pt, test.pt
+  - [ ] metadata.json
+  - [ ] scaler_params.json
+- [ ] Add logging and progress bars
+- [ ] Write integration tests
+
+**Deliverables**:
+- `Preprocessing/prepare_sequences.py` (500-600 lines)
+- Integration tests
+
+**Time Estimate**: 6-8 hours
+
+---
+
+### M1.3: Run Preprocessing (Day 12) - 0/4
+
+- [ ] Run preprocessing on full dataset
+  ```bash
+  python3 Preprocessing/prepare_sequences.py
+  ```
+- [ ] Verify output files exist
+- [ ] Check tensor shapes
+  ```python
+  data = torch.load('DATA/processed/train.pt')
+  print(data['features'].shape)  # Should be [~680, 500, 11]
+  ```
+- [ ] Validate quality statistics in metadata.json
+
+**Deliverables**:
+- `DATA/processed/train.pt`
+- `DATA/processed/val.pt`
+- `DATA/processed/test.pt`
+- `DATA/processed/metadata.json`
+- `DATA/processed/scaler_params.json`
+
+**Time Estimate**: 1-2 hours (mostly waiting for script)
+
+---
+
+### M1.4: Verification & EDA (Days 13-14) - 0/10
+
+- [ ] Create `Preprocessing/verify_preprocessing.ipynb`
+- [ ] Load preprocessed tensors
+- [ ] Verify shapes
+  - [ ] features: [N, 500, 11]
+  - [ ] heart_rate: [N, 500, 1]
+  - [ ] mask: [N, 500, 1]
+- [ ] Check mask correctness
+  - [ ] mask sum == sum of original lengths
+  - [ ] Padded regions have mask=0
+- [ ] Compute feature correlations
+  - [ ] Speed → HR
+  - [ ] Speed_lag_2 → HR (should be higher!)
+  - [ ] Other features → HR
+- [ ] Visualize feature distributions
+- [ ] Check for data leakage (no user overlap)
+- [ ] Compute padding statistics
+- [ ] Generate preprocessing report
+- [ ] Create summary visualizations
+
+**Deliverables**:
+- `Preprocessing/verify_preprocessing.ipynb`
+- Feature correlation report
+- Preprocessing summary document
+
+**Time Estimate**: 3-4 hours
+
+---
+
+**Phase 1 Summary**: 0/34 tasks (0%)  
+**Estimated Time**: ~20-25 hours over 7 days
+
+---
+
+## ⏳ Phase 2: Model Training (0/22)
+
+**Goal**: Train LSTM with 11 features and masked loss  
+**Duration**: Week 3 (7 days)  
+**Priority**: 🟡 MEDIUM (after Phase 1)
+
+### M2.1: Model Implementation (Days 15-16) - 0/8
+
+- [ ] Create `Model/lstm.py`
+- [ ] Implement `HeartRateLSTM_v2` class
+  - [ ] __init__ (input_size=11, hidden_size=128, num_layers=2, dropout=0.3)
+  - [ ] forward (accept features [B, 500, 11])
+  - [ ] Return predictions [B, 500, 1]
+- [ ] Create `Model/loss.py`
+- [ ] Implement `MaskedMSELoss` class
+  - [ ] __init__
+  - [ ] forward (pred, target, mask)
+  - [ ] Compute loss * mask, then sum / mask.sum()
+- [ ] Test model forward pass
+- [ ] Test loss computation
+- [ ] Write unit tests
+
+**Deliverables**:
+- `Model/lstm.py` (100-150 lines)
+- `Model/loss.py` (30-50 lines)
+- Unit tests
+
+**Time Estimate**: 3-4 hours
+
+---
+
+### M2.2: Training Pipeline (Days 17-18) - 0/10
+
+- [ ] Create `Model/train.py`
+- [ ] Implement dataset and dataloader
+  - [ ] TensorDataset from preprocessed data
+  - [ ] DataLoader with num_workers=4
+- [ ] Implement training loop
+  - [ ] Forward pass
+  - [ ] Masked loss computation
+  - [ ] Backward pass
+  - [ ] Gradient clipping (1.0)
+  - [ ] Optimizer step
+- [ ] Implement validation loop
+- [ ] Implement early stopping
+  - [ ] Track best validation loss
+  - [ ] Patience counter (10 epochs)
+- [ ] Implement learning rate scheduling
+  - [ ] ReduceLROnPlateau (factor=0.5, patience=5)
+- [ ] Implement checkpoint saving
+  - [ ] Save best model
+  - [ ] Save optimizer state
+  - [ ] Save training config
+- [ ] Implement logging
+  - [ ] TensorBoard or file logging
+  - [ ] Log train/val loss, MAE
+- [ ] Add command-line arguments
+- [ ] Add progress bars (tqdm)
+
+**Deliverables**:
+- `Model/train.py` (400-500 lines)
+
+**Time Estimate**: 6-8 hours
+
+---
+
+### M2.3: Initial Training Run (Day 19) - 0/4
+
+- [ ] Train with default hyperparameters
+  ```bash
+  python3 Model/train.py --model lstm --epochs 100 --batch_size 16
+  ```
+- [ ] Monitor training curves
+- [ ] Check validation MAE
+- [ ] Evaluate on validation set
+
+**Expected Results**:
+- Training converges in <50 epochs
+- Validation MAE < 13 BPM (at least as good as V1)
+
+**Deliverables**:
+- `checkpoints/lstm_v2_baseline.pt`
+- `results/training_curves.png`
+- Validation metrics
+
+**Time Estimate**: 2-3 hours (mostly waiting)
+
+---
+
+### M2.4: Hyperparameter Tuning (Days 20-21) - 0/6
+
+- [ ] **Experiment 1**: hidden_size
+  - [ ] Train with hidden_size=64
+  - [ ] Train with hidden_size=128 (baseline)
+  - [ ] Train with hidden_size=256
+- [ ] **Experiment 2**: dropout
+  - [ ] Train with dropout=0.2
+  - [ ] Train with dropout=0.3 (baseline)
+  - [ ] Train with dropout=0.4
+- [ ] **Experiment 3**: learning_rate
+  - [ ] Train with lr=0.0001
+  - [ ] Train with lr=0.0005 (baseline)
+  - [ ] Train with lr=0.001
+- [ ] Compare all results
+- [ ] Select best configuration
+- [ ] Re-train with best config
+
+**Deliverables**:
+- Hyperparameter search results table
+- `checkpoints/best_model.pt`
+
+**Time Estimate**: 8-10 hours (mostly waiting)
+
+---
+
+**Phase 2 Summary**: 0/28 tasks (0%)  
+**Estimated Time**: ~25-30 hours over 7 days
+
+---
+
+## ⏳ Phase 3: Evaluation & Analysis (0/18)
+
+**Goal**: Comprehensive evaluation and comparison with V1  
+**Duration**: Week 4 (7 days)  
+**Priority**: 🟢 LOW (after Phase 2)
+
+### M3.1: Test Set Evaluation (Day 22) - 0/5
+
+- [ ] Create `Model/evaluate.py`
+- [ ] Load best checkpoint
+- [ ] Run evaluation on test set
+- [ ] Compute metrics
+  - [ ] MAE (primary metric)
+  - [ ] RMSE
+  - [ ] R²
+  - [ ] Per-sample MAE
+- [ ] Generate visualizations
+  - [ ] Prediction vs actual (sample workouts)
+  - [ ] Error distribution
+  - [ ] MAE histogram
+
+**Deliverables**:
+- `Model/evaluate.py` (200-300 lines)
+- `results/test_metrics.json`
+- Visualization plots
+
+**Time Estimate**: 3-4 hours
+
+---
+
+### M3.2: Ablation Study (Days 23-24) - 0/7
+
+- [ ] **Baseline**: Train with 3 base features only
+- [ ] **+Lag**: Train with base + lag features (6 total)
+- [ ] **+Derivatives**: Train with base + lag + derivatives (8 total)
+- [ ] **+Rolling**: Train with base + lag + derivatives + rolling (10 total)
+- [ ] **All**: Train with all 11 features
+- [ ] Compare results in table
+- [ ] Analyze feature importance
+
+**Deliverables**:
+- Ablation study results table
+- Feature importance analysis
+
+**Time Estimate**: 6-8 hours (mostly waiting)
+
+---
+
+### M3.3: V1 vs V2 Comparison (Day 25) - 0/4
+
+- [ ] Load V1 baseline results from `/SUB_3H_42KM_DL/Model/FINAL_RESULTS.md`
+- [ ] Create comparison table
+  - [ ] MAE (V1: 13.88, V2: ?)
+  - [ ] RMSE
+  - [ ] R²
+  - [ ] Training time
+- [ ] Analyze improvement sources
+  - [ ] Feature engineering contribution
+  - [ ] Masking contribution
+  - [ ] Quality filtering contribution
+- [ ] Generate comparison report
+
+**Deliverables**:
+- `results/v1_vs_v2_comparison.md`
+- Comparison visualization
+
+**Time Estimate**: 2-3 hours
+
+---
+
+### M3.4: Final Report & Documentation (Days 26-28) - 0/8
+
+- [ ] Write final results report
+  - [ ] Executive summary
+  - [ ] Detailed results
+  - [ ] Ablation study findings
+  - [ ] V1 vs V2 comparison
+  - [ ] Lessons learned
+- [ ] Update README.md with V2 results
+- [ ] Update CHANGELOG.md
+- [ ] Update PROJECT_SUMMARY.md
+- [ ] Generate presentation slides (optional)
+- [ ] Code cleanup and documentation
+- [ ] Add final comments to code
+- [ ] Create reproducibility instructions
+
+**Deliverables**:
+- `results/FINAL_REPORT_V2.md`
+- Updated documentation
+- Clean, well-commented code
+
+**Time Estimate**: 6-8 hours
+
+---
+
+**Phase 3 Summary**: 0/24 tasks (0%)  
+**Estimated Time**: ~20-25 hours over 7 days
+
+---
+
+## 📊 Progress Summary
+
+### Overall Project Status
+
+| Phase | Tasks Complete | Total Tasks | Progress | Status |
+|-------|---------------|-------------|----------|--------|
+| **Documentation** | 11 | 11 | 100% | ✅ Complete |
+| **Phase 0: Data Quality** | 0 | 28 | 0% | ⏳ Not Started |
+| **Phase 1: Preprocessing** | 0 | 34 | 0% | ⏳ Not Started |
+| **Phase 2: Training** | 0 | 28 | 0% | ⏳ Not Started |
+| **Phase 3: Evaluation** | 0 | 24 | 0% | ⏳ Not Started |
+| **TOTAL** | **11** | **125** | **9%** | 🔄 In Progress |
+
+### Time Estimates
+
+| Phase | Estimated Hours | Status |
+|-------|----------------|--------|
+| Documentation | 8 hours | ✅ Complete |
+| Phase 0 | 15-20 hours | ⏳ Pending |
+| Phase 1 | 20-25 hours | ⏳ Pending |
+| Phase 2 | 25-30 hours | ⏳ Pending |
+| Phase 3 | 20-25 hours | ⏳ Pending |
+| **TOTAL** | **88-108 hours** (~2-3 weeks) | - |
+
+---
+
+## 🎯 Current Priority Tasks
+
+### This Week (Week 1: Data Quality)
+
+1. 🔴 **HIGH**: Setup annotation environment (Day 1)
+2. 🔴 **HIGH**: Annotate 100 workouts (Days 2-5)
+3. 🟡 **MEDIUM**: Analyze annotations (Day 6)
+4. 🟡 **MEDIUM**: Implement quality filters (Day 7)
+
+### Next Week (Week 2: Preprocessing)
+
+5. 🟡 **MEDIUM**: Implement feature engineering
+6. 🟡 **MEDIUM**: Implement preprocessing pipeline
+7. 🟢 **LOW**: Run preprocessing
+8. 🟢 **LOW**: Verify results
+
+---
+
+## 🚀 Quick Commands
+
+```bash
+# Navigate to project
+cd /home/riccardo/Documents/Collaborative-Projects/SUB3_V2
+
+# Check current status
+cat TODO.md
+
+# View roadmap
+cat ROADMAP.md
+
+# Start Phase 0
+cat docs/QUICK_START.md
+
+# Update this TODO list
+vim TODO.md
+```
+
+---
+
+## 📝 Notes
+
+### Completed Items Archive
+
+**2025-01-10**:
+- ✅ Created comprehensive documentation (11 files, 76 KB)
+- ✅ BMAD methodology applied (PRD, Architecture, Data Quality)
+- ✅ Project structure established
+- ✅ Roadmap and TODO list created
+
+### Blockers
+
+- None currently
+
+### Open Questions
+
+- [ ] Which annotation tool? (Streamlit recommended)
+- [ ] Quality threshold? (70/100 suggested, to be validated)
+- [ ] Reduce sequence length to 400? (TBD based on Phase 1 results)
+
+---
+
+**Last Updated**: 2025-01-10  
+**Next Review**: After Phase 0 completion  
+**Owner**: Riccardo
