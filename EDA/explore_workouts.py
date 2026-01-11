@@ -24,7 +24,7 @@ from datetime import datetime
 # Constants - use absolute paths
 _THIS_FILE = Path(__file__).resolve()
 PROJECT_ROOT = _THIS_FILE.parent.parent  # EDA -> SUB3_V2
-DATA_FILE = PROJECT_ROOT / "DATA" / "raw" / "endomondoHR_proper.json"
+DATA_FILE = PROJECT_ROOT / "DATA" / "raw" / "endomondoHR_proper-002.json"
 INDEX_DIR = PROJECT_ROOT / "DATA" / "indices"
 COMPUTED_SPEED_FILE = PROJECT_ROOT / "DATA" / "processed" / "running_computed_speed.jsonl"
 COMPUTED_SPEED_INDEX = PROJECT_ROOT / "DATA" / "indices" / "computed_speed_offsets.idx"
@@ -258,18 +258,22 @@ def create_workout_figure(workout: Dict, smooth_window: int = 1, show_raw: bool 
         hovermode='x unified'
     )
     
-    # Update y-axes
+    # Update y-axes - use selector for secondary_y instead of parameter
     fig.update_yaxes(
         title_text="Heart Rate (BPM)", 
-        titlefont=dict(color='#e74c3c'),
+        title_font=dict(color='#e74c3c'),
         tickfont=dict(color='#e74c3c'),
-        row=1, col=1, secondary_y=False
+        row=1, col=1
     )
-    fig.update_yaxes(
-        title_text="Speed (km/h)", 
-        titlefont=dict(color='#3498db'),
-        tickfont=dict(color='#3498db'),
-        row=1, col=1, secondary_y=True
+    # Secondary y-axis for speed (yaxis2)
+    fig.update_layout(
+        yaxis2=dict(
+            title_text="Speed (km/h)",
+            title_font=dict(color='#3498db'),
+            tickfont=dict(color='#3498db'),
+            overlaying='y',
+            side='right'
+        )
     )
     fig.update_yaxes(title_text="Altitude (m)", row=2, col=1)
     
@@ -664,7 +668,7 @@ def main():
     
     # Main visualization
     fig = create_workout_figure(workout, smooth_window=smooth_window, show_raw=show_raw)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
     
     # Raw data expander
     with st.expander("📊 Raw Data"):
