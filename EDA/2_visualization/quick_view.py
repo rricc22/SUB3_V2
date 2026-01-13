@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 
-DATA_FILE = Path(__file__).parent.parent / "DATA" / "raw" / "endomondoHR_proper.json"
+DATA_FILE = Path(__file__).parent.parent.parent / "DATA" / "raw" / "endomondoHR_proper-002.json"
 
 
 def get_line(filepath: Path, line_number: int) -> str:

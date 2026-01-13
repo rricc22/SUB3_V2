@@ -13,8 +13,8 @@ import sys
 from pathlib import Path
 from time import time
 
-DATA_FILE = Path(__file__).parent.parent / "DATA" / "raw" / "endomondoHR_proper.json"
-INDEX_DIR = Path(__file__).parent.parent / "DATA" / "indices"
+DATA_FILE = Path(__file__).parent.parent.parent / "DATA" / "raw" / "endomondoHR_proper-002.json"
+INDEX_DIR = Path(__file__).parent.parent.parent / "DATA" / "indices"
 
 
 def build_index():

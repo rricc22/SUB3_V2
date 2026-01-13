@@ -15,7 +15,7 @@ import random
 from pathlib import Path
 from collections import defaultdict
 
-DATA_FILE = Path(__file__).parent.parent / "DATA" / "raw" / "endomondoHR_proper.json"
+DATA_FILE = Path(__file__).parent.parent.parent / "DATA" / "raw" / "endomondoHR_proper-002.json"
 
 
 def get_running_lines_with_speed(limit=1000):

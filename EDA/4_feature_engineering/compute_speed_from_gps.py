@@ -19,9 +19,9 @@ from time import time
 import json
 
 # Constants
-DATA_FILE = Path(__file__).parent.parent / "DATA" / "raw" / "endomondoHR_proper.json"
-INDEX_DIR = Path(__file__).parent.parent / "DATA" / "indices"
-OUTPUT_DIR = Path(__file__).parent.parent / "DATA" / "processed"
+DATA_FILE = Path(__file__).parent.parent.parent / "DATA" / "raw" / "endomondoHR_proper-002.json"
+INDEX_DIR = Path(__file__).parent.parent.parent / "DATA" / "indices"
+OUTPUT_DIR = Path(__file__).parent.parent.parent / "DATA" / "processed"
 
 # Speed limits for running (km/h)
 MIN_SPEED = 0.0          # Can be standing still

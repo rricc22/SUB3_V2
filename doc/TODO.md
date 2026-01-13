@@ -1,176 +1,163 @@
 # SUB3_V2 TODO List
 
-**Last Updated**: 2025-01-10  
-**Current Phase**: Phase 0 - Data Quality Validation  
-**Overall Progress**: 25% (Documentation complete)
+**Last Updated**: 2026-01-13  
+**Current Phase**: Phase 2 - Tensor Preparation & Feature Engineering  
+**Overall Progress**: 50% (Data processing complete)
 
 ---
 
 ## 📋 Quick Status
 
 ```
-✅ Documentation Complete (11 files, 76 KB)
-⏳ Phase 0: Data Quality (0/28 tasks)
-⏳ Phase 1: Preprocessing (0/24 tasks)
-⏳ Phase 2: Model Training (0/22 tasks)
-⏳ Phase 3: Evaluation (0/18 tasks)
+✅ Documentation Complete (Jan 10, 2025)
+✅ Phase 0: Data Exploration & Quality Infrastructure (Jan 11-13, 2026)
+✅ Phase 1: Data Preprocessing Pipeline (Jan 11-13, 2026)
+🔴 Phase 2: Tensor Preparation & Feature Engineering (0/12 tasks) ← CURRENT
+⏳ Phase 3: Model Training (0/16 tasks)
+⏳ Phase 4: Evaluation (0/15 tasks)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total: 0/92 tasks complete (0%)
+Total: Phases 0-1 complete, Phase 2 in progress
 ```
 
 ---
 
 ## 🔴 HIGH PRIORITY - Start Here!
 
-### 🎯 Next Actions (Phase 0, Week 1)
+### 🎯 Next Actions (Phase 2)
 
-- [ ] **Day 1**: Setup annotation environment
-- [ ] **Days 2-5**: Annotate 100 workouts (20/day)
-- [ ] **Day 6**: Analyze annotations
-- [ ] **Day 7**: Implement quality filters
+- [ ] **Day 1-2**: Implement feature engineering module
+- [ ] **Day 3-4**: Implement sequence preparation pipeline  
+- [ ] **Day 5**: Verify tensors and feature correlations
 
 ---
 
 ## ✅ Phase -1: Documentation (COMPLETE)
 
+**Completed**: Jan 10, 2025
+
 ### Documentation Files (11/11) ✅
 
 - [x] README.md (project overview)
 - [x] AGENTS.md (coding guidelines)
+- [x] CLAUDE.md (AI assistant context)
 - [x] ROADMAP.md (development roadmap)
 - [x] TODO.md (this file)
 - [x] PROJECT_SUMMARY.md (status snapshot)
-- [x] docs/PRD.md (product requirements)
-- [x] docs/ARCHITECTURE.md (technical specs)
-- [x] docs/DATA_QUALITY.md (quality criteria)
-- [x] docs/CHANGELOG.md (version history)
-- [x] docs/QUICK_START.md (getting started)
-- [x] Module READMEs (DATA, Preprocessing, Model)
+- [x] GET_STARTED.md (quick start guide)
+- [x] EDA/README.md (EDA documentation)
+- [x] Preprocessing/README.md (preprocessing documentation)
 
-**Status**: ✅ 100% Complete (2025-01-10)
+**Status**: ✅ 100% Complete
 
 ---
 
-## ⏳ Phase 0: Data Quality Validation (0/28)
+## ✅ Phase 0: Data Exploration & Quality Infrastructure (COMPLETE)
 
-**Goal**: Manually validate 100 workouts to establish quality baselines  
-**Duration**: Week 1 (7 days)  
-**Priority**: 🔴 HIGH
+**Completed**: Jan 11-13, 2026  
+**Duration**: 3 days
 
-### M0.1: Setup Annotation Environment (Day 1) - 0/6
+### Completed Work ✅
 
-- [ ] Install dependencies
-  ```bash
-  pip install streamlit plotly pandas numpy matplotlib
-  ```
-- [ ] Create `EDA/quality_annotation_app.py` (Streamlit app)
-- [ ] Sample 100 workouts from `DATA/raw/endomondoHR.json`
-- [ ] Save sample to `DATA/quality_check/sample_workouts.json`
-- [ ] Test annotation app on 5 workouts
-- [ ] Fix any bugs in annotation workflow
+#### Data Indexing
+- [x] Built line-based indices for 61K+ workouts (EDA/1_data_indexing/)
+- [x] Speed index for GPS-computed data
+- [x] Apple Watch data processing
+- [x] Memory-efficient random access via linecache
 
-**Deliverables**:
-- `EDA/quality_annotation_app.py`
-- `DATA/quality_check/sample_workouts.json`
+**Files**:
+- `EDA/1_data_indexing/build_index.py`
+- `EDA/1_data_indexing/build_speed_index.py`
+- `EDA/1_data_indexing/process_apple_watch.py`
+- `DATA/indices/running_all.txt`, `running_complete.txt`
 
-**Time Estimate**: 3-4 hours
+#### Visualization Tools
+- [x] Interactive Streamlit app for workout exploration
+- [x] HTML gallery generator (46K+ workout thumbnails)
+- [x] Quick matplotlib plotting utility
+- [x] Apple Watch gallery
 
----
+**Files**:
+- `EDA/2_visualization/explore_workouts.py`
+- `EDA/2_visualization/generate_gallery.py`
+- `EDA/2_visualization/generate_apple_watch_gallery.py`
+- `EDA/2_visualization/quick_view.py`
+- `EDA/gallery/` (HTML interface)
 
-### M0.2: Manual Annotation (Days 2-5) - 0/5
+#### Quality Analysis
+- [x] Anomaly feature computation (30+ anomaly types)
+- [x] Pattern flagging algorithms
+- [x] Sample analysis tools
+- [x] Support for 10% manual annotation strategy
 
-- [ ] **Day 2**: Annotate 20 workouts (1-20)
-- [ ] **Day 3**: Annotate 20 workouts (21-40)
-- [ ] **Day 4**: Annotate 20 workouts (41-60)
-- [ ] **Day 5**: Annotate 40 workouts (61-100)
-- [ ] Document common quality issues in notes
+**Files**:
+- `EDA/3_quality_analysis/compute_anomaly_features.py`
+- `EDA/3_quality_analysis/flag_weird_patterns.py`
+- `EDA/3_quality_analysis/analyze_checked_patterns.py`
+- `EDA/3_quality_analysis/analyze_sample.py`
 
-**Annotation Checklist** (per workout):
-- Quality score (0-100 slider)
-- HR sensor quality (dropdown: Good/Spikes/Flatlines/Dropouts)
-- GPS quality (dropdown: Good/Noisy/Impossible speeds/Pauses)
-- Altitude quality (dropdown: Good/Jumps/Noisy)
-- Valid for training (checkbox)
-- Notes (text area)
+#### Feature Engineering Prep
+- [x] GPS speed computation from coordinates (~50K workouts)
+- [x] Haversine formula implementation with outlier handling
 
-**Deliverables**:
-- `DATA/quality_check/annotations.csv` (100 rows)
+**Files**:
+- `EDA/4_feature_engineering/compute_speed_from_gps.py`
 
-**Time Estimate**: 4 days × 1 hour = 4 hours total
-
----
-
-### M0.3: Quality Analysis (Day 6) - 0/7
-
-- [ ] Load annotations CSV
-- [ ] Compute quality score distribution
-- [ ] Analyze quality grade breakdown (Excellent/Good/Acceptable/Poor)
-- [ ] Calculate % valid for training
-- [ ] Identify common failure modes
-- [ ] Establish quality thresholds
-- [ ] Generate quality report
-
-**Analysis Tasks**:
-```python
-# Quality distribution
-annotations['quality_score'].describe()
-annotations['grade'] = pd.cut(
-    annotations['quality_score'],
-    bins=[0, 30, 50, 70, 90, 100],
-    labels=['Very Poor', 'Poor', 'Acceptable', 'Good', 'Excellent']
-)
-
-# Common issues
-hr_issues = annotations['hr_quality'].value_counts()
-gps_issues = annotations['gps_quality'].value_counts()
-```
-
-**Deliverables**:
-- `DATA/quality_check/quality_report.md`
-- `DATA/quality_check/quality_distribution.png`
-
-**Time Estimate**: 2-3 hours
+**Phase 0 Summary**: ✅ Complete data exploration and quality infrastructure
 
 ---
 
-### M0.4: Implement Automated Filters (Day 7) - 0/10
+## ✅ Phase 1: Data Preprocessing Pipeline (COMPLETE)
 
-- [ ] Create `Preprocessing/quality_filters.py`
-- [ ] Implement `validate_hr_sensor()` function
-  - [ ] Check for spikes (>30 BPM/timestep)
-  - [ ] Check for flatlines (>10 identical values)
-  - [ ] Check for dropouts (HR=0 mid-workout)
-- [ ] Implement `validate_gps_speed()` function
-  - [ ] Check for impossible speeds (>25 km/h)
-  - [ ] Check for GPS noise (high std of speed_diff)
-- [ ] Implement `validate_altitude()` function
-  - [ ] Check for altitude jumps (>100m/timestep)
-  - [ ] Check for noise (high frequency oscillations)
-- [ ] Implement `validate_timestamps()` function
-  - [ ] Check monotonic increasing
-  - [ ] Check sampling regularity
-- [ ] Implement `validate_workout_quality()` wrapper
-- [ ] Test on annotated workouts (>80% agreement)
-- [ ] Write unit tests
+**Completed**: Jan 11-13, 2026  
+**Duration**: 2 days
 
-**Deliverables**:
-- `Preprocessing/quality_filters.py` (200-300 lines)
-- Unit tests
+### Completed Work ✅
 
-**Time Estimate**: 4-5 hours
+#### 3-Stage Hybrid Pipeline
+- [x] **Stage 1**: Rule-based filtering (stage1_filter.py)
+  - Hard filters for auto-exclusion
+  - Soft flags for LLM review  
+  - Offset detection heuristics
+  - Processed all 61K+ running workouts
+  
+- [x] **Stage 2**: LLM validation (stage2_llm_validation.py)
+  - Reviewed flagged workouts
+  - Detected HR offset errors (-20 to -60 BPM)
+  - Classified workouts: INTENSIVE/INTERVALS/STEADY/RECOVERY
+  - Provided correction parameters
+  
+- [x] **Stage 3**: Apply corrections (stage3_apply_corrections.py)
+  - Applied HR offset fixes
+  - Generated clean dataset
 
----
+**Files**:
+- `Preprocessing/stage1_filter.py`
+- `Preprocessing/stage2_llm_validation.py`
+- `Preprocessing/stage3_apply_corrections.py`
+- `Preprocessing/stage1_output.json` (355KB flagged, 46MB full)
+- `Preprocessing/stage2_output.json` (13MB)
+- `Preprocessing/clean_dataset.json` (560MB)
 
-**Phase 0 Summary**: 0/28 tasks (0%)  
-**Estimated Time**: ~15-20 hours over 7 days
+#### Post-Processing
+- [x] Merged GPS-computed speeds
+- [x] Applied moving average smoothing
+- [x] Created exploration tools
 
----
+**Files**:
+- `Preprocessing/merge_computed_speeds.py`
+- `Preprocessing/apply_moving_average.py`
+- `Preprocessing/explore_smoothed.py`
+- `Preprocessing/view_smoothed.py`
+- `Preprocessing/clean_dataset_merged.json` (1.7GB)
+- `Preprocessing/clean_dataset_smoothed.json` (2.3GB, ~94M lines)
 
-## ⏳ Phase 1: Preprocessing Pipeline (0/24)
+**Phase 1 Summary**: ✅ Complete data cleaning with offset correction and smoothing
 
-**Goal**: Transform raw data into PyTorch tensors with engineered features  
-**Duration**: Week 2 (7 days)  
-**Priority**: 🟡 MEDIUM (after Phase 0)
+## 🔴 Phase 2: Tensor Preparation & Feature Engineering (IN PROGRESS)
+
+**Goal**: Transform cleaned JSON into PyTorch tensors with 11 engineered features  
+**Duration**: 3-5 days  
+**Priority**: 🔴 HIGH - CURRENT PHASE
 
 ### M1.1: Feature Engineering (Days 8-9) - 0/10
 

@@ -69,3 +69,9 @@ temp/
 *.tmp
 
 DATA/
+EDA/gallery/
+
+# Preprocessing large JSON files (intermediate data)
+Preprocessing/*.json
+Preprocessing/*.jsonl
+!Preprocessing/README.md

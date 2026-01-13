@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 from time import time
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 COMPUTED_SPEED_FILE = PROJECT_ROOT / "DATA" / "processed" / "running_computed_speed.jsonl"
 INDEX_FILE = PROJECT_ROOT / "DATA" / "indices" / "computed_speed_offsets.idx"
 
