@@ -278,8 +278,7 @@ def train(args):
         optimizer,
         mode='min',
         factor=0.5,
-        patience=args.scheduler_patience,
-        verbose=True
+        patience=args.scheduler_patience
     )
 
     # Create checkpoint directory

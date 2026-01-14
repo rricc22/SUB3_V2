@@ -109,6 +109,43 @@ python3 EDA/1_data_indexing/build_index.py
 python3 EDA/1_data_indexing/build_speed_index.py
 ```
 
+### Model Training & Evaluation
+```bash
+# Train model (run from project root)
+python3 Model/train.py --batch-size 64 --dropout 0.4 --lr 0.0005 --patience 3
+
+# Train with GPU (recommended)
+python3 Model/train.py --batch-size 128 --dropout 0.4 --lr 0.0005 --patience 5
+
+# Evaluate trained model on test set
+python3 Model/evaluate.py --checkpoint Model/checkpoints/best_model.pt \
+    --data-dir DATA/processed --output-dir Model/results
+
+# Training tips:
+# - Batch size 64-128 prevents high gradient variance (was 16 in initial attempt)
+# - Dropout 0.4 helps prevent overfitting (model was overfitting by epoch 1 with 0.3)
+# - LR 0.0005 provides stable convergence (0.001 was too high)
+# - Early stopping patience 3-5 catches best model quickly
+# - Always run from project root (DATA/processed path is relative)
+```
+
+### Animations & Visualizations
+```bash
+# Generate all 5 animation types
+python3 Model/animate_predictions.py --checkpoint Model/checkpoints/best_model.pt \
+    --data-dir DATA/processed --output-dir Model/animations --fps 20
+
+# Animation types created:
+# 1. Gradual reveal (best workout) - Shows speed, HR prediction, ground truth appearing
+# 2. Gradual reveal (worst workout) - Demonstrates challenging cases
+# 3. Multi-workout comparison - 4 workouts side-by-side
+# 4. Feature influence - Speed/altitude effect on HR with cursor tracking
+# 5. Error heatmap - Error evolution across multiple workouts
+
+# Investigate specific workout anomalies
+python3 Model/investigate_workout.py  # Analyzes workout #7 offset error
+```
+
 ## Key Design Patterns
 
 ### Memory-Efficient Streaming
@@ -154,22 +191,54 @@ loss = ((predictions - targets) ** 2).mean()  # Includes padding pollution
 
 ## Important Context
 
-### Baseline Metrics (V1)
+### Model Performance
+
+**V1 Baseline:**
 - Best model (finetuned): 8.94 BPM MAE
 - Baseline LSTM: 13.88 BPM MAE
-- V2 target: < 10 BPM MAE (base model, no finetuning)
+
+**V2 Current (2026-01-14):**
+- Test MAE: 11.90 BPM (RMSE: 14.42 BPM)
+- Training stopped at epoch 6 (early stopping, patience=3)
+- Config: batch_size=64, dropout=0.4, lr=0.0005, hidden=128, layers=2
+- Dataset: 32,806 train / 7,299 val / 6,145 test samples
+- Model params: 204,417 trainable parameters
+
+**V2 Target:** < 10 BPM MAE (base model, no finetuning)
+
+**Known Issues:**
+- Model exhibits "regression to mean" - clusters predictions around 145-160 BPM
+- Underpredicts high HR (>170 BPM), overpredicts low HR (<130 BPM)
+- Some HR offset errors remain in test set (e.g., workout #4600: 31 BPM systematic offset)
+- Needs weight decay (L2 regularization) and larger batch sizes for improvement
 
 ### Common Issues
 1. **Offset errors**: Most common data quality issue (expected running HR: 150-190 BPM)
+   - Some offset errors passed preprocessing and remain in test set
+   - Example: Test workout #4600 has 31 BPM systematic offset (true HR ~120 BPM at 12.3 km/h pace)
+   - Model correctly predicts ~155 BPM, but gets 31 BPM "error" vs incorrect ground truth
+   - Signature: Constant error throughout workout, negative speed-HR correlation
 2. **Weak correlation**: V1 had speed→HR correlation of only 0.25 (missing temporal features)
 3. **Padding pollution**: 43% of sequences are padded (V2 uses masking)
 4. **Distribution mismatch**: V1 test set had different statistics (V2 uses stratified splitting)
+5. **Regression to mean**: Model clusters predictions around 145-160 BPM (typical training HR range)
 
 ### File Organization
 - `DATA/raw/`: Raw Endomondo JSON (symlink to V1 project)
+- `DATA/processed/`: Preprocessed tensors (train.pt, val.pt, test.pt), metadata, scaler params
 - `DATA/indices/`: Line-based indices for fast lookup
 - `EDA/`: Analysis scripts organized by purpose (indexing, visualization, quality, features)
 - `Preprocessing/`: 3-stage pipeline scripts
+- `Model/`: Training, evaluation, and visualization scripts
+  - `train.py`: Main training script with W&B integration
+  - `evaluate.py`: Test set evaluation with metrics and plots
+  - `animate_predictions.py`: Generate 5 animation types
+  - `investigate_workout.py`: Deep-dive analysis for anomalous workouts
+  - `lstm.py`: HeartRateLSTM_V2 model architecture
+  - `loss.py`: Masked loss functions (MSE/MAE) and metrics
+  - `checkpoints/`: Saved model weights
+  - `results/`: Evaluation outputs (plots, metrics JSON)
+  - `animations/`: Generated GIF animations
 - `doc/`: BMAD documentation (PRD, Architecture, Data Quality, Roadmap)
 
 ### Coding Conventions
@@ -201,12 +270,49 @@ These inform offset detection thresholds:
 - Speed/altitude spikes
 - Large timestamp gaps
 
+### Animation Insights
+
+The 5 animation types provide different perspectives on model performance:
+
+1. **Gradual Reveal (Best)**: Shows model capability on ideal data (MAE ~2.6 BPM)
+   - Speed profile reveals workout structure
+   - HR prediction tracks ground truth closely
+   - Error stays consistently low throughout
+
+2. **Gradual Reveal (Worst)**: Exposes model limitations (MAE ~42 BPM)
+   - Often indicates data quality issues (offset errors)
+   - Low-intensity workouts where model regresses to mean
+   - Useful for identifying preprocessing gaps
+
+3. **Multi-Workout Comparison**: Demonstrates prediction quality distribution
+   - Side-by-side comparison of 4 diverse workouts
+   - Shows how model performs across intensity ranges
+   - Helps identify workout types where model struggles
+
+4. **Feature Influence**: Visualizes speed/altitude → HR causality
+   - Red cursor sweeps through time showing current state
+   - Reveals HR response lag to speed changes (~30 seconds typical)
+   - Highlights altitude effect on cardiovascular demand
+
+5. **Error Heatmap**: Detects systematic vs random errors
+   - Green rows = consistently accurate workouts
+   - Red rows = systematic issues (offset errors, sensor malfunction)
+   - Horizontal red bars = constant offset throughout workout
+   - Vertical red spikes = specific time periods with high error
+
+**Debugging with Animations:**
+- Constant error across time → HR offset issue in ground truth
+- High error at speed changes → Insufficient lag features
+- High error on climbs → Altitude features need tuning
+- Random spikes → GPS noise or sensor dropouts
+
 ### Testing Strategy
 When implementing new features:
 1. Test on small sample first (use `--limit 100`)
 2. Verify on known good/bad workouts (line numbers in gallery)
 3. Check edge cases (first/last timesteps for lag features)
 4. Validate output format matches downstream consumers
+5. Generate animations to visually validate predictions across workout types
 
 ## Reference Projects
 - **V1 Project**: `/home/riccardo/Documents/Collaborative-Projects/SUB_3H_42KM_DL`

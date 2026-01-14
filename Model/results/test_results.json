@@ -1,0 +1,16 @@
+{
+  "test_mae": 11.89714235502884,
+  "test_rmse": 14.418699087293483,
+  "num_samples": 6145,
+  "checkpoint_epoch": 6,
+  "val_mae_at_checkpoint": 11.194063141034997,
+  "model_config": {
+    "input_size": 11,
+    "hidden_size": 128,
+    "num_layers": 2,
+    "dropout": 0.4,
+    "bidirectional": false,
+    "num_parameters": 204417,
+    "num_trainable_parameters": 204417
+  }
+}
