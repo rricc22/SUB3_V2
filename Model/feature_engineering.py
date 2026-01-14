@@ -1,15 +1,17 @@
 """
 Feature Engineering Module for SUB3_V2
 
-Implements 11 features for heart rate prediction:
+Implements 14 features for heart rate prediction:
 - Base (3): speed, altitude, gender
 - Lag (3): speed_lag_2, speed_lag_5, altitude_lag_30
 - Derivatives (2): speed_derivative, altitude_derivative
 - Rolling (2): rolling_speed_10, rolling_speed_30
 - Cumulative (1): cumulative_elevation_gain
+- Workout Type (3): is_recovery, is_steady, is_intensive (one-hot)
 
 Author: Riccardo
 Date: 2026-01-13
+Updated: 2026-01-14 - Added workout type one-hot encoding
 """
 
 import numpy as np
@@ -92,16 +94,18 @@ def compute_cumulative_elevation_gain(altitude: np.ndarray) -> np.ndarray:
 
 def engineer_features(workout: Dict) -> np.ndarray:
     """
-    Engineer all 11 features from a workout dictionary.
+    Engineer all 14 features from a workout dictionary.
 
     Args:
         workout: Dictionary containing:
             - 'speed': List of speed values in km/h
             - 'altitude': List of altitude values in meters
             - 'gender': Binary (1.0 for male, 0.0 for female)
+            - 'workout_type_onehot': Dict with RECOVERY, STEADY, INTENSIVE keys
+              OR 'workout_type': String ('RECOVERY', 'STEADY', 'INTENSIVE')
 
     Returns:
-        Array of shape [seq_len, 11] with all features:
+        Array of shape [seq_len, 14] with all features:
             0: speed
             1: altitude
             2: gender (repeated for all timesteps)
@@ -113,6 +117,9 @@ def engineer_features(workout: Dict) -> np.ndarray:
             8: rolling_speed_10
             9: rolling_speed_30
             10: cumulative_elevation_gain
+            11: is_recovery (one-hot)
+            12: is_steady (one-hot)
+            13: is_intensive (one-hot)
     """
     # Extract base features
     speed = np.array(workout['speed'], dtype=np.float32)
@@ -124,8 +131,24 @@ def engineer_features(workout: Dict) -> np.ndarray:
     # Validate input
     assert len(altitude) == seq_len, "Speed and altitude must have same length"
 
+    # Extract workout type one-hot encoding
+    if 'workout_type_onehot' in workout:
+        onehot = workout['workout_type_onehot']
+        is_recovery = float(onehot.get('RECOVERY', 0))
+        is_steady = float(onehot.get('STEADY', 0))
+        is_intensive = float(onehot.get('INTENSIVE', 0))
+    elif 'workout_type' in workout:
+        # Fallback: derive from workout_type string
+        wtype = workout['workout_type']
+        is_recovery = 1.0 if wtype == 'RECOVERY' else 0.0
+        is_steady = 1.0 if wtype == 'STEADY' else 0.0
+        is_intensive = 1.0 if wtype == 'INTENSIVE' else 0.0
+    else:
+        # Default to STEADY if no type info
+        is_recovery, is_steady, is_intensive = 0.0, 1.0, 0.0
+
     # Initialize feature array
-    features = np.zeros((seq_len, 11), dtype=np.float32)
+    features = np.zeros((seq_len, 14), dtype=np.float32)
 
     # Base features
     features[:, 0] = speed
@@ -148,12 +171,17 @@ def engineer_features(workout: Dict) -> np.ndarray:
     # Cumulative elevation gain
     features[:, 10] = compute_cumulative_elevation_gain(altitude)
 
+    # Workout type one-hot (broadcast to all timesteps)
+    features[:, 11] = is_recovery
+    features[:, 12] = is_steady
+    features[:, 13] = is_intensive
+
     return features
 
 
 def get_feature_names() -> List[str]:
     """
-    Get names of all 11 features in order.
+    Get names of all 14 features in order.
 
     Returns:
         List of feature names
@@ -169,7 +197,10 @@ def get_feature_names() -> List[str]:
         'altitude_derivative',
         'rolling_speed_10',
         'rolling_speed_30',
-        'cumulative_elevation_gain'
+        'cumulative_elevation_gain',
+        'is_recovery',
+        'is_steady',
+        'is_intensive'
     ]
 
 
@@ -178,12 +209,12 @@ def validate_features(features: np.ndarray) -> bool:
     Validate engineered features for common issues.
 
     Args:
-        features: Array of shape [seq_len, 11]
+        features: Array of shape [seq_len, 14]
 
     Returns:
         True if valid, raises AssertionError otherwise
     """
-    assert features.shape[1] == 11, f"Expected 11 features, got {features.shape[1]}"
+    assert features.shape[1] == 14, f"Expected 14 features, got {features.shape[1]}"
     assert not np.any(np.isnan(features)), "Features contain NaN values"
     assert not np.any(np.isinf(features)), "Features contain Inf values"
 
@@ -196,6 +227,19 @@ def validate_features(features: np.ndarray) -> bool:
     assert np.all(altitude >= -500) and np.all(altitude < 10000), "Altitude out of reasonable range [-500, 10000] m"
     assert np.all((gender == 0) | (gender == 1)), "Gender must be binary (0 or 1)"
 
+    # Validate one-hot encoding
+    is_recovery = features[:, 11]
+    is_steady = features[:, 12]
+    is_intensive = features[:, 13]
+
+    assert np.all((is_recovery == 0) | (is_recovery == 1)), "is_recovery must be binary"
+    assert np.all((is_steady == 0) | (is_steady == 1)), "is_steady must be binary"
+    assert np.all((is_intensive == 0) | (is_intensive == 1)), "is_intensive must be binary"
+
+    # Exactly one type should be active (one-hot constraint)
+    type_sum = is_recovery + is_steady + is_intensive
+    assert np.all(type_sum == 1), "Exactly one workout type must be active (one-hot)"
+
     return True
 
 
@@ -203,19 +247,24 @@ if __name__ == "__main__":
     # Test on a sample workout
     print("Testing feature engineering...")
 
-    # Create synthetic workout
+    # Create synthetic workout with one-hot encoding
     test_workout = {
         'speed': [10.0] * 100 + [12.0] * 100 + [8.0] * 100,  # 300 timesteps
         'altitude': list(range(100, 400)),  # Increasing altitude
         'gender': 1.0,
-        'heart_rate': [150] * 300  # Not used in feature engineering
+        'heart_rate': [150] * 300,  # Not used in feature engineering
+        'workout_type_onehot': {
+            'RECOVERY': 0,
+            'STEADY': 1,
+            'INTENSIVE': 0
+        }
     }
 
     # Engineer features
     features = engineer_features(test_workout)
 
     print(f"✓ Feature shape: {features.shape}")
-    print(f"✓ Expected: (300, 11)")
+    print(f"✓ Expected: (300, 14)")
     print(f"\nFeature statistics:")
 
     for i, name in enumerate(get_feature_names()):
@@ -229,3 +278,18 @@ if __name__ == "__main__":
         print("\n✓ All validation checks passed!")
     except AssertionError as e:
         print(f"\n✗ Validation failed: {e}")
+
+    # Test fallback from workout_type string
+    print("\n\nTesting fallback from workout_type string...")
+    test_workout_string = {
+        'speed': [10.0] * 100,
+        'altitude': [100.0] * 100,
+        'gender': 1.0,
+        'workout_type': 'INTENSIVE'
+    }
+    features_string = engineer_features(test_workout_string)
+    print(f"  is_recovery: {features_string[0, 11]}")
+    print(f"  is_steady: {features_string[0, 12]}")
+    print(f"  is_intensive: {features_string[0, 13]}")
+    assert features_string[0, 13] == 1.0, "INTENSIVE should be 1"
+    print("✓ Fallback test passed!")

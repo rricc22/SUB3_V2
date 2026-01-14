@@ -8,9 +8,11 @@ Features:
 - Early stopping
 - Learning rate scheduling
 - Checkpoint saving
+- 14 input features (including workout type one-hot)
 
 Author: Riccardo
 Date: 2026-01-13
+Updated: 2026-01-14 - 14 input features with workout type
 """
 
 import torch
@@ -218,7 +220,7 @@ def train(args):
             project=args.wandb_project,
             name=args.run_name if args.run_name else None,
             config={
-                'input_size': 11,
+                'input_size': 14,
                 'hidden_size': args.hidden_size,
                 'num_layers': args.num_layers,
                 'dropout': args.dropout,
@@ -229,7 +231,8 @@ def train(args):
                 'early_stop_patience': args.patience,
                 'loss_function': args.loss_fn,
                 'device': str(device),
-                'seed': args.seed
+                'seed': args.seed,
+                'workout_type_features': True
             }
         )
         print(f"\n✓ W&B initialized: {wandb.run.name}")
@@ -246,9 +249,12 @@ def train(args):
     print(f"  Train batches: {len(train_loader)}")
     print(f"  Val batches: {len(val_loader)}")
 
+    # Get input size from metadata (default to 14 for V2)
+    input_size = metadata.get('num_features', 14)
+
     # Create model
     model = HeartRateLSTM_V2(
-        input_size=11,
+        input_size=input_size,
         hidden_size=args.hidden_size,
         num_layers=args.num_layers,
         dropout=args.dropout,
@@ -376,7 +382,7 @@ def main():
     parser = argparse.ArgumentParser(description='Train SUB3_V2 Heart Rate Prediction Model')
 
     # Data
-    parser.add_argument('--data-dir', default='DATA/processed', help='Data directory')
+    parser.add_argument('--data-dir', default='DATA/processed_v2', help='Data directory')
 
     # Model
     parser.add_argument('--hidden-size', type=int, default=128, help='LSTM hidden size')
@@ -400,7 +406,7 @@ def main():
     parser.add_argument('--seed', type=int, default=42, help='Random seed')
 
     # Checkpoints
-    parser.add_argument('--checkpoint-dir', default='checkpoints', help='Checkpoint directory')
+    parser.add_argument('--checkpoint-dir', default='Model/checkpoints_v2', help='Checkpoint directory')
     parser.add_argument('--save-every', type=int, default=10, help='Save checkpoint every N epochs')
 
     # W&B

@@ -2,9 +2,15 @@
 Prepare Sequences for SUB3_V2 Training
 
 Implements the V1 methodology with V2 improvements:
-1. Load clean_dataset_smoothed.json
+1. Load clean_dataset_v2.json (filtered, with workout_type_onehot)
 2. Load gender from raw data using line_number
-3. Engineer 11 features (vs 3 in V1)
+3. Engineer 14 features (vs 3 in V1):
+   - Base (3): speed, altitude, gender
+   - Lag (3): speed_lag_2, speed_lag_5, altitude_lag_30
+   - Derivatives (2): speed_derivative, altitude_derivative
+   - Rolling (2): rolling_speed_10, rolling_speed_30
+   - Cumulative (1): cumulative_elevation_gain
+   - Workout Type (3): is_recovery, is_steady, is_intensive (one-hot)
 4. Pad/truncate to 500 timesteps with mask generation (V2 improvement)
 5. User-based stratified split (70/15/15)
 6. Normalize features (fit on train only, HR unnormalized)
@@ -12,6 +18,7 @@ Implements the V1 methodology with V2 improvements:
 
 Author: Riccardo
 Date: 2026-01-13
+Updated: 2026-01-14 - Added workout type one-hot encoding (14 features)
 """
 
 import json
@@ -71,13 +78,13 @@ def pad_or_truncate_with_mask(
     Pad or truncate sequences to target length and generate mask.
 
     Args:
-        features: Array of shape [seq_len, 11]
+        features: Array of shape [seq_len, 14]
         heart_rate: Array of shape [seq_len, 1]
         target_length: Target sequence length
 
     Returns:
         Tuple of (features, heart_rate, mask, original_length)
-        - features: [target_length, 11]
+        - features: [target_length, 14]
         - heart_rate: [target_length, 1]
         - mask: [target_length, 1] (1=valid, 0=padded)
         - original_length: Length before padding
@@ -164,10 +171,12 @@ def prepare_sequences(
             workout_data = {
                 'speed': workout['speed'],
                 'altitude': workout['altitude'],
-                'gender': gender
+                'gender': gender,
+                'workout_type_onehot': workout.get('workout_type_onehot'),
+                'workout_type': workout.get('workout_type')
             }
 
-            # Engineer features
+            # Engineer features (14 features including workout type one-hot)
             features = engineer_features(workout_data)
 
             # Extract heart rate
@@ -199,7 +208,7 @@ def prepare_sequences(
         print()
 
     # Convert to numpy arrays
-    all_features = np.array(all_features, dtype=np.float32)  # [N, 500, 11]
+    all_features = np.array(all_features, dtype=np.float32)  # [N, 500, 14]
     all_heart_rate = np.array(all_heart_rate, dtype=np.float32)  # [N, 500, 1]
     all_masks = np.array(all_masks, dtype=np.float32)  # [N, 500, 1]
     all_original_lengths = np.array(all_original_lengths, dtype=np.int32)
@@ -288,12 +297,14 @@ def prepare_sequences(
     if verbose:
         print("Step 3: Normalizing features (fit on train only)...")
 
-    # We'll normalize all features except gender (column 2)
+    # We'll normalize all features except binary/one-hot features:
+    # - gender (column 2)
+    # - is_recovery, is_steady, is_intensive (columns 11, 12, 13)
     # Features to normalize: 0-1 (speed, altitude), 3-10 (all temporal features)
-    # Gender (column 2) stays as 0/1
 
     scalers = {}
     feature_names = get_feature_names()
+    skip_normalize = {'gender', 'is_recovery', 'is_steady', 'is_intensive'}
 
     # Prepare normalized features
     train_features_norm = train_features.copy()
@@ -301,8 +312,8 @@ def prepare_sequences(
     test_features_norm = test_features.copy()
 
     for i, name in enumerate(feature_names):
-        if name == 'gender':
-            # Don't normalize gender
+        if name in skip_normalize:
+            # Don't normalize binary/one-hot features
             continue
 
         if verbose:
@@ -406,8 +417,9 @@ def prepare_sequences(
         'random_seed': RANDOM_SEED,
         'seq_length': SEQ_LENGTH,
         'min_seq_length': MIN_SEQ_LENGTH,
-        'num_features': 11,
+        'num_features': 14,
         'feature_names': feature_names,
+        'workout_type_features': ['is_recovery', 'is_steady', 'is_intensive'],
         'train_samples': len(train_indices),
         'val_samples': len(val_indices),
         'test_samples': len(test_indices),
@@ -447,8 +459,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Prepare sequences for SUB3_V2 training")
     parser.add_argument(
         '--input',
-        default='Preprocessing/clean_dataset_smoothed.json',
-        help='Path to clean_dataset_smoothed.json'
+        default='Preprocessing/clean_dataset_v2.json',
+        help='Path to clean_dataset_v2.json (filtered with workout_type_onehot)'
     )
     parser.add_argument(
         '--raw-data',

@@ -2,12 +2,14 @@
 LSTM Model for Heart Rate Prediction (SUB3_V2)
 
 Architecture:
-- Input: [batch, seq_len=500, num_features=11]
+- Input: [batch, seq_len=500, num_features=14]
+  Features: speed, altitude, gender, 8 temporal features, 3 workout type one-hot
 - LSTM: 2 layers, configurable hidden size, dropout
 - Output: [batch, seq_len=500, 1] (unnormalized HR in BPM)
 
 Author: Riccardo
 Date: 2026-01-13
+Updated: 2026-01-14 - 14 input features (added workout type one-hot)
 """
 
 import torch
@@ -18,13 +20,17 @@ class HeartRateLSTM_V2(nn.Module):
     """
     LSTM model for heart rate prediction from running data.
 
-    Uses 11 input features (speed, altitude, gender + 8 engineered features)
-    and outputs heart rate predictions for each timestep.
+    Uses 14 input features:
+    - Base (3): speed, altitude, gender
+    - Temporal (8): lag, derivative, rolling, cumulative features
+    - Workout type (3): is_recovery, is_steady, is_intensive (one-hot)
+
+    Outputs heart rate predictions for each timestep.
     """
 
     def __init__(
         self,
-        input_size: int = 11,
+        input_size: int = 14,
         hidden_size: int = 128,
         num_layers: int = 2,
         dropout: float = 0.3,
@@ -34,7 +40,7 @@ class HeartRateLSTM_V2(nn.Module):
         Initialize the LSTM model.
 
         Args:
-            input_size: Number of input features (default: 11)
+            input_size: Number of input features (default: 14)
             hidden_size: Number of hidden units in LSTM (default: 128)
             num_layers: Number of LSTM layers (default: 2)
             dropout: Dropout rate between LSTM layers (default: 0.3)
@@ -101,11 +107,11 @@ class HeartRateLSTM_V2(nn.Module):
 
 if __name__ == "__main__":
     # Test the model
-    print("Testing HeartRateLSTM_V2...")
+    print("Testing HeartRateLSTM_V2 (14 features)...")
 
     # Create model
     model = HeartRateLSTM_V2(
-        input_size=11,
+        input_size=14,
         hidden_size=128,
         num_layers=2,
         dropout=0.3,
@@ -124,7 +130,7 @@ if __name__ == "__main__":
     # Test forward pass
     batch_size = 4
     seq_len = 500
-    input_size = 11
+    input_size = 14
 
     x = torch.randn(batch_size, seq_len, input_size)
     print(f"\nInput shape: {x.shape}")

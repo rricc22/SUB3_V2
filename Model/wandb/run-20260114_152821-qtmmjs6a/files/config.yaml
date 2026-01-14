@@ -1,0 +1,82 @@
+_wandb:
+    value:
+        cli_version: 0.22.3
+        e:
+            gk8vwq495d6c812zq2e2m7zxr2xepy8p:
+                args:
+                    - --batch-size
+                    - "64"
+                    - --dropout
+                    - "0.4"
+                    - --lr
+                    - "0.0005"
+                    - --patience
+                    - "5"
+                    - --run-name
+                    - v2_workout_type_14features
+                codePath: Model/train.py
+                codePathLocal: Model/train.py
+                cpu_count: 8
+                cpu_count_logical: 16
+                disk:
+                    /:
+                        total: "1005867986944"
+                        used: "447020937216"
+                email: riccardo.castellano@yahoo.fr
+                executable: /home/riccardo/miniconda3/envs/ai_general/bin/python3
+                git:
+                    commit: e27d06e91b349ef963d2b4d327ab5077eb345acf
+                    remote: https://github.com/rricc22/SUB3_V2.git
+                host: riccardo-ThinkPad-P14s-Gen-5-AMD
+                memory:
+                    total: "29050191872"
+                os: Linux-6.14.0-1019-oem-x86_64-with-glibc2.39
+                program: /home/riccardo/Documents/SUB3_V2/Model/train.py
+                python: CPython 3.10.19
+                root: /home/riccardo/Documents/SUB3_V2
+                startedAt: "2026-01-14T14:28:21.448984Z"
+                writerId: gk8vwq495d6c812zq2e2m7zxr2xepy8p
+        m: []
+        python_version: 3.10.19
+        t:
+            "1":
+                - 1
+                - 105
+            "2":
+                - 1
+                - 105
+            "3":
+                - 2
+                - 13
+                - 16
+                - 62
+            "4": 3.10.19
+            "5": 0.22.3
+            "12": 0.22.3
+            "13": linux-x86_64
+batch_size:
+    value: 64
+bidirectional:
+    value: false
+device:
+    value: cpu
+dropout:
+    value: 0.4
+early_stop_patience:
+    value: 5
+epochs:
+    value: 100
+hidden_size:
+    value: 128
+input_size:
+    value: 14
+learning_rate:
+    value: 0.0005
+loss_function:
+    value: mse
+num_layers:
+    value: 2
+seed:
+    value: 42
+workout_type_features:
+    value: true

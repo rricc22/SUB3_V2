@@ -1,0 +1,40 @@
+{
+  "os":  "Linux-6.14.0-1019-oem-x86_64-with-glibc2.39",
+  "python":  "CPython 3.10.19",
+  "startedAt":  "2026-01-14T14:28:21.448984Z",
+  "args":  [
+    "--batch-size",
+    "64",
+    "--dropout",
+    "0.4",
+    "--lr",
+    "0.0005",
+    "--patience",
+    "5",
+    "--run-name",
+    "v2_workout_type_14features"
+  ],
+  "program":  "/home/riccardo/Documents/SUB3_V2/Model/train.py",
+  "codePath":  "Model/train.py",
+  "codePathLocal":  "Model/train.py",
+  "git":  {
+    "remote":  "https://github.com/rricc22/SUB3_V2.git",
+    "commit":  "e27d06e91b349ef963d2b4d327ab5077eb345acf"
+  },
+  "email":  "riccardo.castellano@yahoo.fr",
+  "root":  "/home/riccardo/Documents/SUB3_V2",
+  "host":  "riccardo-ThinkPad-P14s-Gen-5-AMD",
+  "executable":  "/home/riccardo/miniconda3/envs/ai_general/bin/python3",
+  "cpu_count":  8,
+  "cpu_count_logical":  16,
+  "disk":  {
+    "/":  {
+      "total":  "1005867986944",
+      "used":  "447020937216"
+    }
+  },
+  "memory":  {
+    "total":  "29050191872"
+  },
+  "writerId":  "gk8vwq495d6c812zq2e2m7zxr2xepy8p"
+}
