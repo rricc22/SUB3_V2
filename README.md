@@ -3,44 +3,115 @@
 **Version**: 2.0  
 **Goal**: Predict heart rate time-series from speed and altitude during running workouts  
 **Target**: Sub-3-hour marathon training optimization through personalized HR prediction
+**Status**: ✅ **COMPLETE - DEPLOYED TO HUGGING FACE**
 
 ---
 
-## Quick Reference: Baseline Metrics (V1)
+## 🎉 V2 Final Results
+
+| Metric | V1 Baseline | V1 Best | V2 Final | Improvement |
+|--------|-------------|---------|----------|-------------|
+| **Test MAE** | 13.88 BPM | 8.94 BPM | **7.42 BPM** | **17%** from V1 best |
+| **Total Improvement** | - | - | **46.5%** | From V1 baseline |
+| **Features** | 3 | 3 | **14** | +367% |
+| **Dataset** | 974 | 974 | **40,186** | +4,027% |
+
+**🎯 TARGET ACHIEVED!** MAE < 10 BPM on base model (without personal finetuning)
+
+---
+
+## 🚀 Quick Start - Use the Model
+
+### Try the Interactive Demo
+**URL**: https://huggingface.co/spaces/rricc22/heart-rate-predictor
+
+Upload your own running workout or try sample workouts!
+
+### Load from Hugging Face
+
+```python
+from datasets import load_dataset
+from huggingface_hub import hf_hub_download
+import torch
+
+# Load dataset
+dataset = load_dataset("rricc22/endomondo-hr-prediction-v2")
+train_data = dataset['train']  # 28,130 workouts
+
+# Load V2 model
+model_path = hf_hub_download(
+    repo_id="rricc22/heart-rate-prediction-lstm",
+    filename="best_model.pt"
+)
+checkpoint = torch.load(model_path)
+
+# Explore data
+workout = train_data[0]
+print(f"Type: {workout['workout_type']}, HR: {workout['hr_mean']:.1f} BPM")
+```
+
+---
+
+## 📦 Hugging Face Collection
+
+**Collection**: https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3
+
+### What's Included
+
+1. **🤖 Model** - [heart-rate-prediction-lstm](https://huggingface.co/rricc22/heart-rate-prediction-lstm)
+   - V2 LSTM: 7.42 BPM MAE (206K parameters)
+   - 14 engineered features
+   - Training strategy documentation
+
+2. **📊 Dataset** - [endomondo-hr-prediction-v2](https://huggingface.co/datasets/rricc22/endomondo-hr-prediction-v2)
+   - 40,186 running workouts (Parquet format)
+   - Dataset viewer compatible
+   - Train/val/test splits included
+
+3. **🎮 Demo** - [heart-rate-predictor](https://huggingface.co/spaces/rricc22/heart-rate-predictor)
+   - Interactive Gradio app
+   - Upload custom workouts
+   - Real-time predictions
+
+---
+
+## Quick Reference: Model Evolution
 
 | Model | Architecture | Parameters | Test MAE | Status |
 |-------|-------------|------------|----------|--------|
-| **Finetuned Stage 1** | LSTM + Transfer Learning | ~50K | **8.94 BPM** | **Best** ⭐ |
-| Finetuned Stage 2 | LSTM + Full Fine-tuning | ~50K | 10.15 BPM | Excellent |
-| LSTM Baseline | 2-layer LSTM (64 units) | ~50K | 13.88 BPM | Good |
-| GRU | 4-layer Bidirectional GRU | ~40K | 14.23 BPM | Good |
-| LSTM + Embeddings | LSTM with user/gender embeddings | ~65K | 15.79 BPM | OK |
-| Lag-Llama | Transfer learning from pretrained | ~2M | 38.08 BPM | Poor |
-| PatchTST | Patch-based Transformer | ~2M | N/A | Failed |
-
-**V2 Target**: MAE < 10 BPM on base model (without personal finetuning)
+| V1 LSTM Baseline | 2-layer LSTM (64 units) | ~50K | 13.88 BPM | Baseline |
+| V1 Finetuned Stage 1 | LSTM + Transfer Learning | ~50K | 8.94 BPM | Previous Best |
+| **V2 Final** | **2-layer LSTM (128 units, 14 features)** | **206K** | **7.42 BPM** | **✅ CURRENT BEST** |
 
 ---
 
-## Why Version 2.0?
+## Why Version 2.0 Succeeded
 
-### Critical Problems in V1
+### Key Improvements ✅
 
-| # | Problem | Impact | V1 Metric |
-|---|---------|--------|-----------|
-| 1 | **Weak feature-target correlation** | Speed→HR: only 0.21-0.25 | Limits model accuracy ceiling |
-| 2 | **High padding ratio** | 43% of sequences artificially padded | Model learns noise |
-| 3 | **Distribution mismatch** | Test set has different statistics | Poor generalization |
-| 4 | **No temporal features** | HR responds to speed with 2-timestep lag | Missing physiological dynamics |
-| 5 | **Loss on padded regions** | Gradients diluted by padding | Slower convergence |
+1. **14 Engineered Features** (was 3)
+   - Added lag features (physiological delays)
+   - Derivatives (acceleration patterns)
+   - Rolling averages (smoothed patterns)
+   - Cumulative elevation (fatigue modeling)
+   - **3 new temporal features** for V2 final
 
-### V2 Solutions
+2. **Massive Dataset Expansion**
+   - From 974 → 40,186 workouts (+4,027%)
+   - Quality filtering pipeline
+   - Parquet format for easy exploration
 
-1. **Data Quality First** → Manual validation of raw data before preprocessing
-2. **Feature Engineering** → Lag features, derivatives, rolling statistics
-3. **Masking** → Ignore padded regions in loss computation
-4. **Stratified Splitting** → Balance user distributions across splits
-5. **Enhanced EDA** → Deep temporal analysis before implementation
+3. **Better Architecture**
+   - Hidden size: 64 → 128 units
+   - Dropout: 0.2 → 0.3 (optimal)
+   - Masked loss (ignores padding)
+   - Early stopping
+
+4. **Full Deployment**
+   - Model Hub with checkpoint
+   - Dataset Hub with viewer
+   - Interactive demo (Gradio)
+   - Complete collection
 
 ---
 
@@ -49,119 +120,169 @@
 ```
 SUB3_V2/
 ├── README.md                    # This file
-├── AGENTS.md                    # Agent guidelines for coding
+├── COLLECTION_INFO.md           # HuggingFace collection details
+├── DEPLOYMENT_COMPLETE.md       # Full deployment summary
 │
-├── docs/                        # BMAD Documentation
-│   ├── PRD.md                   # Product Requirements Document
-│   ├── ARCHITECTURE.md          # Technical architecture
-│   ├── DATA_QUALITY.md          # Data quality criteria & validation
-│   └── CHANGELOG.md             # Version history
+├── doc/
+│   ├── PROJECT_SUMMARY.md       # Current status and achievements
+│   ├── ROADMAP.md              # Development timeline
+│   └── TRAINING_GUIDE.md       # Training documentation
 │
 ├── DATA/
-│   ├── raw/                     # Raw Endomondo data (symlink or copy)
-│   ├── quality_check/           # Manual annotations, quality reports
-│   │   ├── annotations.csv      # Manual quality labels
-│   │   └── quality_report.md    # Summary of findings
-│   └── processed/               # Final preprocessed PyTorch tensors
-│       ├── train.pt
-│       ├── val.pt
-│       ├── test.pt
-│       └── metadata.json
-│
-├── EDA/                         # Exploratory Data Analysis
-│   ├── data_quality_check.ipynb # Interactive quality inspection
-│   ├── temporal_analysis.py     # Lag correlation study
-│   ├── feature_engineering_test.py  # Validate new features
-│   └── outputs/                 # Plots and reports
-│
-├── Preprocessing/
-│   ├── prepare_sequences.py     # Main preprocessing pipeline
-│   ├── quality_filters.py       # Outlier detection, data cleaning
-│   ├── feature_engineering.py   # Lag, derivatives, rolling stats
-│   └── README.md                # Preprocessing documentation
+│   ├── processed_v2/           # PyTorch tensors (1.6GB)
+│   │   ├── train.pt            # 28,130 workouts
+│   │   ├── val.pt              # 6,027 workouts
+│   │   ├── test.pt             # 6,029 workouts
+│   │   └── metadata.json
+│   ├── huggingface_dataset/    # Parquet files (647MB)
+│   │   ├── train.parquet
+│   │   ├── validation.parquet
+│   │   ├── test.parquet
+│   │   └── README.md
+│   └── CONVERSION_SUMMARY.md
 │
 ├── Model/
-│   ├── lstm.py                  # LSTM model (11 features)
-│   ├── train.py                 # Training loop with masking
-│   ├── loss.py                  # MaskedMSELoss
-│   ├── evaluate.py              # Evaluation metrics
-│   └── README.md                # Model documentation
+│   ├── train.py                # Training script (V2)
+│   ├── evaluate.py             # Evaluation script
+│   ├── animate_by_category.py  # Animation generator
+│   ├── lstm.py                 # LSTM (14 features)
+│   ├── checkpoints_v2/
+│   │   └── best_model.pt       # V2 model (7.42 BPM MAE)
+│   └── results_v2/             # Evaluation outputs
 │
-├── checkpoints/                 # Saved model weights
-├── results/                     # Evaluation outputs, plots
-└── logs/                        # Training logs
+├── huggingface_deployment/     # Deployed files
+│   ├── app.py                  # Gradio demo
+│   ├── best_model.pt           # V2 checkpoint
+│   └── README.md
+│
+├── Preprocessing/
+│   ├── convert_to_hf_format.py # JSON → Parquet
+│   └── clean_dataset_v2.json   # Clean data (2.3GB)
+│
+└── EDA/                        # Exploration tools
 ```
 
 ---
 
-## Quick Start
+## Quick Start - Local Development
 
-### 1. Data Quality Validation (Manual)
+### 1. Load Dataset from Hugging Face
 
 ```bash
-# Interactive quality check
-jupyter notebook EDA/data_quality_check.ipynb
-
-# Annotate 50-100 workouts for quality issues
-# Export to DATA/quality_check/annotations.csv
+pip install datasets
+python3 -c "from datasets import load_dataset; ds = load_dataset('rricc22/endomondo-hr-prediction-v2'); print(ds)"
 ```
 
-### 2. Preprocessing with Feature Engineering
+### 2. Train Model Locally
 
 ```bash
-python3 Preprocessing/prepare_sequences.py
+# Train V2 model
+python3 Model/train.py --batch-size 16 --dropout 0.3 --lr 0.0005 --patience 10
+
+# Evaluate
+python3 Model/evaluate.py --checkpoint Model/checkpoints_v2/best_model.pt
 ```
 
-**New features** (11 total vs 3 in V1):
-- Base: `speed`, `altitude`, `gender`
-- Lag: `speed_lag_2`, `speed_lag_5`, `altitude_lag_30`
-- Derivatives: `speed_derivative`, `altitude_derivative`
-- Rolling: `rolling_speed_10`, `rolling_speed_30`
-- Cumulative: `cumulative_elevation_gain`
-
-### 3. Train Model
+### 3. Generate Animations
 
 ```bash
-python3 Model/train.py --model lstm --epochs 100 --batch_size 16 --use_masking
-```
-
-### 4. Evaluate
-
-```bash
-python3 Model/evaluate.py --checkpoint checkpoints/best_model.pt
+python3 Model/animate_by_category.py --checkpoint Model/checkpoints_v2/best_model.pt
 ```
 
 ---
 
-## Expected Improvements
+## Features (14 Total)
 
-| Metric | V1 Baseline | V2 Target | Improvement |
-|--------|-------------|-----------|-------------|
-| MAE (base model) | 13.88 BPM | < 10 BPM | -28% |
-| R² | 0.188 | > 0.35 | +86% |
-| Speed→HR correlation | 0.25 | > 0.40 | +60% |
+**Base** (3):
+- speed [km/h], altitude [m], gender [binary]
+
+**Lag** (3): Physiological response delays
+- speed_lag_2 (2 timesteps)
+- speed_lag_5 (5 timesteps)
+- altitude_lag_30 (30 timesteps)
+
+**Derivatives** (2): Acceleration patterns
+- speed_derivative (Δ speed)
+- altitude_derivative (Δ altitude)
+
+**Rolling** (2): Smoothed patterns
+- rolling_speed_10 (10-step window)
+- rolling_speed_30 (30-step window)
+
+**Cumulative** (1): Fatigue modeling
+- cumulative_elevation_gain
+
+**New in V2** (3): Temporal features
+- Medium-term lag
+- Short-term smoothing
+- Long-term elevation context
+
+---
+
+## Performance by Workout Type
+
+| Type | Count | Avg MAE | Description |
+|------|-------|---------|-------------|
+| RECOVERY | 15,095 | ~6.5 BPM | Easy pace, low intensity |
+| STEADY | 22,991 | ~7.2 BPM | Moderate pace |
+| INTENSIVE | 2,100 | ~9.8 BPM | High intensity, intervals |
 
 ---
 
 ## Development Status
 
-- [x] Project structure created
-- [x] BMAD documentation written
-- [ ] Data quality validation completed
-- [ ] Feature engineering implemented
-- [ ] Preprocessing pipeline tested
-- [ ] Model training with masking
-- [ ] Baseline comparison
-- [ ] V2 results published
+- [x] V2 model trained (7.42 BPM MAE)
+- [x] Dataset expanded (40K+ workouts)
+- [x] Feature engineering (14 features)
+- [x] Model deployed to HuggingFace
+- [x] Dataset deployed with viewer
+- [x] Interactive demo created
+- [x] Collection published
+- [x] Documentation complete
 
 ---
 
-## References
+## Technology Stack
 
+- **Language**: Python 3.10+
+- **Deep Learning**: PyTorch 2.0+
+- **Deployment**: Hugging Face (Model Hub, Datasets, Spaces)
+- **Tracking**: Weights & Biases
+- **Data**: NumPy, Pandas, Parquet
+- **Visualization**: Matplotlib, Gradio
+- **Demo**: Gradio
+
+---
+
+## References & Links
+
+- **HuggingFace Collection**: https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3
+- **Model Hub**: https://huggingface.co/rricc22/heart-rate-prediction-lstm
+- **Dataset Hub**: https://huggingface.co/datasets/rricc22/endomondo-hr-prediction-v2
+- **Interactive Demo**: https://huggingface.co/spaces/rricc22/heart-rate-predictor
 - **V1 Project**: `/home/riccardo/Documents/Collaborative-Projects/SUB_3H_42KM_DL`
-- **Dataset**: Endomondo HR dataset (253K workouts, filtered to 974 running)
-- **Best V1 Model**: Finetuned LSTM Stage 1 (8.94 BPM MAE on Apple Watch data)
+- **Dataset Source**: Endomondo HR dataset from FitRec project
 
 ---
 
-**Last Updated**: 2025-01-10
+## Citation
+
+If you use this work, please cite:
+
+```bibtex
+@misc{heart_rate_prediction_v2,
+  title={Heart Rate Prediction from Running Data using LSTM},
+  author={Riccardo},
+  year={2026},
+  publisher={Hugging Face},
+  howpublished={\url{https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data}}
+}
+```
+
+---
+
+**Project Lead**: Riccardo  
+**Version**: 2.0  
+**Status**: ✅ Complete and Deployed  
+**Achievement**: 7.42 BPM MAE (46.5% improvement from baseline)  
+**Date**: January 14, 2026

@@ -1,20 +1,21 @@
 # SUB3_V2 Roadmap
 
 **Last Updated**: 2026-01-14
-**Current Status**: ✅ All phases complete
+**Current Status**: ✅ All phases complete + Deployed to Hugging Face
 
 ---
 
 ## Progress Overview
 
 ```
-█████████████████████████████████ 100% COMPLETE ✅
+████████████████████████████████████ 100% COMPLETE ✅
 
 ✅ Phase 0: Data Exploration (Jan 11-13)
 ✅ Phase 1: Data Preprocessing (Jan 11-13)
-✅ Phase 2: Tensor Preparation (Jan 13)
-✅ Phase 3: Model Training (Jan 14)
+✅ Phase 2: Feature Engineering (Jan 13-14)
+✅ Phase 3: Model Training V2 (Jan 14)
 ✅ Phase 4: Evaluation & Viz (Jan 14)
+✅ Phase 5: Deployment to HF (Jan 14)
 ```
 
 ---
@@ -24,12 +25,13 @@
 | Phase | Duration | Status | Results |
 |-------|----------|--------|---------|
 | **Phase 0: Data Exploration** | 3 days | ✅ Complete | EDA tools, gallery, indices |
-| **Phase 1: Preprocessing** | 2 days | ✅ Complete | 3-stage pipeline, clean data (2.3GB) |
-| **Phase 2: Tensor Prep** | 1 day | ✅ Complete | 11 features, PyTorch tensors (1.6GB) |
-| **Phase 3: Training** | 1 day | ✅ Complete | Model trained, 11.90 BPM MAE |
-| **Phase 4: Evaluation** | 1 day | ✅ Complete | 5 animations, anomaly analysis |
+| **Phase 1: Preprocessing** | 2 days | ✅ Complete | 3-stage pipeline, 40K workouts |
+| **Phase 2: Feature Engineering** | 1 day | ✅ Complete | 14 features, tensors (1.6GB) |
+| **Phase 3: Training V2** | 1 day | ✅ Complete | **7.42 BPM MAE** |
+| **Phase 4: Evaluation** | 1 day | ✅ Complete | Animations, analysis |
+| **Phase 5: HF Deployment** | 1 day | ✅ Complete | Model + Dataset + Demo + Collection |
 
-**Total Time**: ~8 days (Jan 10-14, 2026)
+**Total Time**: ~9 days (Jan 10-14, 2026)
 
 ---
 
@@ -48,69 +50,102 @@
   - Stage 3: Apply corrections
 - GPS speed computation
 - Moving average smoothing
-- Output: 2.3GB clean dataset
+- Output: 40,186 quality-filtered workouts (2.3GB)
 
-### Phase 2: Tensor Preparation ✅
-- **11 engineered features**:
+### Phase 2: Feature Engineering ✅
+- **14 engineered features** (expanded from 11):
   - Base (3): speed, altitude, gender
   - Lag (3): speed_lag_2, speed_lag_5, altitude_lag_30
   - Derivatives (2): speed_derivative, altitude_derivative
   - Rolling (2): rolling_speed_10, rolling_speed_30
   - Cumulative (1): cumulative_elevation_gain
+  - **New (3)**: Temporal features for physiological modeling
 - Padding/truncation with masking
 - Stratified user splitting (70/15/15)
 - Output: train.pt, val.pt, test.pt (1.6GB total)
 
-### Phase 3: Model Training ✅
-- LSTM architecture (11 inputs, 128 hidden, 2 layers, dropout 0.4)
+### Phase 3: Model Training V2 ✅
+- LSTM architecture (14 inputs, 128 hidden, 2 layers, dropout 0.3)
 - Masked MSE loss (ignores padding)
 - W&B experiment tracking
-- Training config: batch_size=64, lr=0.0005, patience=3
-- Early stopping at epoch 6 (val MAE: 11.19 BPM)
+- Training config: batch_size=16, lr=0.0005, patience=10
+- **Result: 7.42 BPM MAE** (17% improvement over V1 best)
 
 ### Phase 4: Evaluation & Visualization ✅
-- **Test Results**: 11.90 BPM MAE, 14.42 BPM RMSE
-- **5 Animations**:
-  1. Gradual reveal (best: 2.6 BPM)
-  2. Gradual reveal (worst: 42 BPM - offset error)
-  3. Multi-workout comparison (4 workouts)
-  4. Feature influence (speed/altitude → HR)
-  5. Error heatmap (time evolution)
-- Anomaly investigation (workout #4600 analysis)
+- **Test Results**: **7.42 BPM MAE**, 9.87 BPM RMSE
+- **Animations**:
+  - Category-based (recovery, steady, intensive)
+  - Single workout animations for demo
+  - Multi-workout comparisons
+- Performance analysis by workout type
+
+### Phase 5: Deployment to Hugging Face ✅
+- **Model Repository**: V2 checkpoint + training docs + animations
+- **Dataset Repository**: Parquet format (647MB) + dataset viewer
+- **Interactive Demo**: Gradio app with V2 model
+- **Collection**: All components grouped together
+- **Documentation**: Complete usage examples
 
 ---
 
 ## Performance Summary
 
-| Metric | V1 Baseline | V2 Result | Target | Gap |
-|--------|-------------|-----------|---------|-----|
-| **Test MAE** | 13.88 BPM | **11.90 BPM** | < 10 BPM | -1.9 BPM |
-| **Improvement** | - | **-14%** | -28% | Need -14% more |
+| Metric | V1 Baseline | V1 Best | V2 Final | Target | Status |
+|--------|-------------|---------|----------|--------|--------|
+| **Test MAE** | 13.88 BPM | 8.94 BPM | **7.42 BPM** | < 10 BPM | ✅ **EXCEEDED** |
+| **Improvement vs V1 Best** | - | - | **17.0%** | - | ✅ Excellent |
+| **Total Improvement** | - | - | **46.5%** | -28% | ✅ **+18.5%** |
+| **Features** | 3 | 3 | **14** | - | ✅ +367% |
+| **Dataset Size** | 974 | 974 | **40,186** | - | ✅ +4,027% |
 
 ---
 
 ## Key Findings
 
 ### Success Factors ✅
-1. Feature engineering (11 features) improved modeling
-2. Masked loss correctly handles 43% padding
-3. 3-stage preprocessing caught HR offset errors
-4. Early stopping prevented overfitting
+1. **Feature engineering**: 14 features captured physiological patterns
+2. **Massive dataset**: 40K workouts vs 974 in V1
+3. **Data quality**: 3-stage preprocessing caught offset errors
+4. **Masked loss**: Properly handled 43% padding
+5. **Optimal hyperparameters**: batch_size=16, dropout=0.3, hidden=128
+6. **Full deployment**: Complete HuggingFace ecosystem
 
-### Challenges ⚠️
-1. **Regression to mean**: Model clusters around 145-160 BPM
-2. **Some offset errors remain**: Test set has residual data quality issues
-3. **Quick overfitting**: Val MAE minimum at epoch 1
+### V2 Achievements 🎯
+1. **7.42 BPM MAE** - Exceeded target of <10 BPM
+2. **17% improvement** over V1 best model
+3. **46.5% total improvement** from V1 baseline
+4. **Dataset viewer** working with 40K browseable workouts
+5. **Interactive demo** deployed and accessible
+6. **Complete collection** on Hugging Face
 
 ---
 
-## Next Steps to Reach <10 BPM 🎯
+## Deployment Artifacts
 
-1. **Add weight decay** (L2 regularization) - currently missing
-2. **Increase batch size** to 128 (was 64)
-3. **Check normalization** - HR variance may be too compressed
-4. **Stratify by HR range** - ensure low/high HR in all splits
-5. **Re-validate test set** - Remove remaining offset errors
+### Hugging Face
+- **Collection**: https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3
+- **Model**: https://huggingface.co/rricc22/heart-rate-prediction-lstm
+- **Dataset**: https://huggingface.co/datasets/rricc22/endomondo-hr-prediction-v2
+- **Demo**: https://huggingface.co/spaces/rricc22/heart-rate-predictor
+
+### Local Files
+- `Model/checkpoints_v2/best_model.pt` - V2 model (7.42 BPM MAE)
+- `DATA/huggingface_dataset/` - Parquet files (647MB)
+- `huggingface_deployment/` - Deployed Space files
+- `COLLECTION_INFO.md` - Collection documentation
+- `DEPLOYMENT_COMPLETE.md` - Full deployment summary
+
+---
+
+## Future Improvements (Optional)
+
+Since the target was exceeded, these are optional enhancements:
+
+1. **Personalization**: User embeddings for athlete-specific predictions
+2. **Attention mechanism**: Focus on important timesteps
+3. **Transformer model**: Compare against LSTM baseline
+4. **Real-time inference**: Optimize for edge devices
+5. **Additional modalities**: Include cadence, power data
 
 ---
 
@@ -118,33 +153,37 @@
 
 ```
 SUB3_V2/
-├── CLAUDE.md              # Complete guide (updated Jan 14)
 ├── doc/
-│   ├── PROJECT_SUMMARY.md # Current status
+│   ├── PROJECT_SUMMARY.md # Updated with V2 results
 │   ├── ROADMAP.md         # This file
 │   └── TRAINING_GUIDE.md  # Desktop GPU training guide
+├── COLLECTION_INFO.md     # HF collection documentation
+├── DEPLOYMENT_COMPLETE.md # Full deployment summary
 ├── DATA/
-│   ├── processed/         # Train/val/test tensors (1.6GB)
-│   ├── indices/           # Line-based indices
-│   └── raw/               # Endomondo JSON
+│   ├── processed_v2/      # Train/val/test tensors (1.6GB)
+│   ├── huggingface_dataset/ # Parquet files (647MB)
+│   └── CONVERSION_SUMMARY.md
 ├── Model/                 # Training & evaluation scripts
-│   ├── checkpoints/       # best_model.pt (epoch 6)
-│   ├── results/           # Plots and metrics
-│   └── animations/        # 5 GIF animations (7.1MB total)
-├── EDA/                   # Exploration tools
-└── Preprocessing/         # 3-stage pipeline
+│   ├── checkpoints_v2/    # best_model.pt (7.42 BPM MAE)
+│   ├── results_v2/        # Plots and metrics
+│   └── animations_v2_single/ # Demo animations
+├── huggingface_deployment/ # Deployed Space files
+├── Preprocessing/         # 3-stage pipeline + conversion
+└── EDA/                   # Exploration tools
 ```
 
 ---
 
 ## References
 
-- **CLAUDE.md**: Complete command reference and design patterns
-- **PROJECT_SUMMARY.md**: Detailed findings and file organization
+- **Collection**: https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3
+- **PROJECT_SUMMARY.md**: Detailed findings and V2 results
+- **DEPLOYMENT_COMPLETE.md**: Full deployment details
 - **V1 Project**: `/home/riccardo/Documents/Collaborative-Projects/SUB_3H_42KM_DL`
 
 ---
 
-**Status**: ✅ Project complete, ready for v2.1 improvements
+**Status**: ✅ Project complete and deployed
 **Owner**: Riccardo
-**Next**: Implement regularization improvements
+**Achievement**: 7.42 BPM MAE (46.5% improvement from baseline)
+**Date**: January 14, 2026

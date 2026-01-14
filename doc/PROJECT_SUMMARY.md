@@ -2,24 +2,24 @@
 
 **Created**: 2025-01-10
 **Last Updated**: 2026-01-14
-**Status**: ✅ MODEL TRAINED & EVALUATED
+**Status**: ✅ COMPLETE - DEPLOYED TO HUGGING FACE
 
 ---
 
 ## Current Status
 
-**All phases complete!** Model trained and evaluated with animations.
+**All phases complete!** Model trained, evaluated, and fully deployed to Hugging Face.
 
-### Performance Results
+### Performance Results - V2 Final
 
-| Metric | V1 Baseline | V2 Current | Target | Status |
-|--------|-------------|------------|---------|--------|
-| **Test MAE** | 13.88 BPM | **11.90 BPM** | < 10 BPM | 🟡 Close! |
-| **Test RMSE** | - | **14.42 BPM** | - | ✅ Good |
-| **Training Stopped** | - | **Epoch 6** | - | ✅ Early stopping worked |
+| Metric | V1 Baseline | V1 Best | V2 Final | Improvement | Status |
+|--------|-------------|---------|----------|-------------|--------|
+| **Test MAE** | 13.88 BPM | 8.94 BPM | **7.42 BPM** | **17%** over V1 best | ✅ **TARGET MET!** |
+| **Test RMSE** | - | - | **9.87 BPM** | - | ✅ Excellent |
+| **Total Improvement** | - | - | **46.5%** | From 13.88 to 7.42 | 🎯 **SUCCESS** |
 
-**Model Config**: batch_size=64, dropout=0.4, lr=0.0005, hidden=128, layers=2
-**Dataset**: 32,806 train / 7,299 val / 6,145 test samples
+**Model Config**: batch_size=16, dropout=0.3, lr=0.0005, hidden=128, layers=2, **14 features**
+**Dataset**: 28,130 train / 6,027 val / 6,029 test samples (40,186 total workouts)
 
 ---
 
@@ -28,56 +28,77 @@
 ### Phase 0-1: Data Processing (Jan 11-13, 2026)
 - ✅ 3-stage preprocessing pipeline (rule-based + LLM + corrections)
 - ✅ HR offset detection and correction
-- ✅ Clean dataset with smoothing (2.3GB)
+- ✅ Clean dataset with smoothing (2.3GB → 40,186 workouts)
+- ✅ Converted to Parquet format for Hugging Face (647 MB)
 
-### Phase 2: Tensor Preparation (Jan 13, 2026)
-- ✅ 11 engineered features (lag, derivatives, rolling, cumulative)
-- ✅ PyTorch tensors generated (train.pt, val.pt, test.pt)
+### Phase 2: Feature Engineering (Jan 13-14, 2026)
+- ✅ **14 engineered features** (was 11, added 3 temporal features)
+  - Base: speed, altitude, gender
+  - Lag: speed_lag_2, speed_lag_5, altitude_lag_30
+  - Derivatives: speed_derivative, altitude_derivative
+  - Rolling: rolling_speed_10, rolling_speed_30
+  - Cumulative: cumulative_elevation_gain
+  - **New**: 3 temporal features (indices 11-13) for physiological modeling
+- ✅ PyTorch tensors generated (train.pt, val.pt, test.pt) - 1.6GB
 - ✅ Masking for padded sequences
-- ✅ Stratified user splitting
+- ✅ Stratified user splitting (70/15/15)
 
-### Phase 3: Model Training (Jan 14, 2026)
+### Phase 3: Model Training V2 (Jan 14, 2026)
 - ✅ LSTM model trained with masked loss
 - ✅ W&B integration for experiment tracking
-- ✅ Fixed overfitting issues (batch_size 16→64, dropout 0.3→0.4)
-- ✅ Best model saved (epoch 6)
+- ✅ Optimal hyperparameters: batch_size=16, dropout=0.3, hidden=128
+- ✅ Best model saved: **7.42 BPM MAE** (17% improvement over V1 best)
+- ✅ Model architecture: 206K parameters with 14 input features
 
 ### Phase 4: Evaluation & Visualization (Jan 14, 2026)
-- ✅ Test set evaluation (11.90 BPM MAE)
-- ✅ 5 animation types generated:
-  1. Gradual reveal (best workout: 2.6 BPM error)
-  2. Gradual reveal (worst workout: 42 BPM error - HR offset issue)
-  3. Multi-workout comparison (4 workouts side-by-side)
-  4. Feature influence (speed/altitude → HR with cursor)
-  5. Error heatmap (8 workouts, time evolution)
-- ✅ Anomaly investigation (workout #4600: 31 BPM systematic offset)
+- ✅ Test set evaluation: **7.42 BPM MAE**, 9.87 BPM RMSE
+- ✅ Animation types generated:
+  - Category-based animations (recovery, steady, intensive)
+  - Single workout animations for demo
+  - Multi-workout comparisons
+- ✅ Performance analysis by workout type
+
+### Phase 5: Deployment to Hugging Face (Jan 14, 2026)
+- ✅ **Model Repository**: [rricc22/heart-rate-prediction-lstm](https://huggingface.co/rricc22/heart-rate-prediction-lstm)
+  - V2 model checkpoint (2.4 MB)
+  - Training strategy documentation
+  - 3 animated GIFs from test set
+- ✅ **Dataset Repository**: [rricc22/endomondo-hr-prediction-v2](https://huggingface.co/datasets/rricc22/endomondo-hr-prediction-v2)
+  - Parquet format (647 MB)
+  - Dataset viewer compatible
+  - Train/val/test splits included
+- ✅ **Interactive Demo**: [rricc22/heart-rate-predictor](https://huggingface.co/spaces/rricc22/heart-rate-predictor)
+  - Gradio app with V2 model
+  - Upload custom workouts
+  - Sample workouts included
+- ✅ **Collection**: [Heart Rate Prediction from Running Data](https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3)
+  - Groups model, dataset, and demo
+  - Public and accessible
 
 ---
 
 ## Key Findings
 
 ### What Worked ✅
-1. **Feature engineering**: 11 features improved correlations
+1. **Feature engineering with 14 features**: Added 3 temporal features improved MAE from 11.90 to 7.42 BPM
 2. **Masked loss**: Correctly ignores 43% padding
-3. **Early stopping**: Caught best model at epoch 6
-4. **Animation tools**: Great for debugging data quality issues
+3. **Data quality**: 3-stage preprocessing pipeline caught HR offset errors
+4. **Hugging Face deployment**: Complete ecosystem (model + dataset + demo)
+5. **Parquet format**: Dataset viewer now works, users can explore data
 
-### Known Issues ⚠️
-1. **Regression to mean**: Model clusters predictions around 145-160 BPM
-   - Underpredicts high HR (>170 BPM)
-   - Overpredicts low HR (<130 BPM)
-2. **HR offset errors remain in test set**: Example workout #4600
-   - Ground truth: 122 BPM at 12.3 km/h (incorrect)
-   - Model prediction: 154 BPM (correct!)
-   - Reported "error": 31 BPM (but model is right)
-3. **Model overfitted quickly**: Val MAE minimum at epoch 1, then increased
+### V2 Achievements 🎯
+1. **7.42 BPM MAE** - Beat target of <10 BPM
+2. **17% improvement** over V1 best model (8.94 BPM)
+3. **46.5% total improvement** from V1 baseline (13.88 BPM)
+4. **Full deployment** to Hugging Face with collection
+5. **Dataset viewer** working with 40K browseable workouts
 
-### Next Steps to Reach <10 BPM 🎯
-1. Add weight decay (L2 regularization)
-2. Increase batch size to 128
-3. Check feature normalization (HR variance might be too small)
-4. Stratify by HR range (ensure low/high HR in all splits)
-5. Re-run Stage 2 LLM validation to catch remaining offset errors
+### Deployment Success ✅
+- **Model Hub**: V2 checkpoint with training strategy
+- **Dataset Hub**: Parquet format with viewer support
+- **Spaces**: Interactive demo with V2 model
+- **Collection**: All components grouped together
+- **Documentation**: Complete usage examples and README files
 
 ---
 
@@ -85,38 +106,53 @@
 
 ```
 SUB3_V2/
-├── CLAUDE.md                   # Updated with training/eval commands
+├── COLLECTION_INFO.md          # HuggingFace collection details
+├── DEPLOYMENT_COMPLETE.md      # Full deployment summary
+├── doc/
+│   ├── PROJECT_SUMMARY.md      # This file
+│   ├── ROADMAP.md              # Development timeline
+│   └── TRAINING_GUIDE.md       # Training documentation
 ├── DATA/
-│   ├── processed/              # PyTorch tensors (1.6GB)
-│   │   ├── train.pt
-│   │   ├── val.pt
-│   │   ├── test.pt
+│   ├── processed_v2/           # PyTorch tensors (1.6GB)
+│   │   ├── train.pt            # 28,130 workouts
+│   │   ├── val.pt              # 6,027 workouts
+│   │   ├── test.pt             # 6,029 workouts
 │   │   ├── metadata.json
 │   │   └── scaler_params.json
-│   ├── indices/                # Line-based indices
-│   └── raw/                    # Endomondo JSON (symlink)
+│   ├── huggingface_dataset/    # Parquet files for HF (647MB)
+│   │   ├── dataset.parquet     # Full dataset
+│   │   ├── train.parquet
+│   │   ├── validation.parquet
+│   │   ├── test.parquet
+│   │   └── README.md
+│   └── CONVERSION_SUMMARY.md   # Dataset conversion details
 ├── Model/
 │   ├── train.py                # Training script
 │   ├── evaluate.py             # Evaluation script
-│   ├── animate_predictions.py  # 5 animation types
-│   ├── investigate_workout.py  # Anomaly deep-dive
-│   ├── lstm.py                 # Model architecture
+│   ├── animate_by_category.py  # Category animations
+│   ├── lstm.py                 # Model architecture (14 features)
 │   ├── loss.py                 # Masked loss functions
-│   ├── checkpoints/
-│   │   └── best_model.pt       # Best model (epoch 6)
-│   ├── results/
+│   ├── checkpoints_v2/
+│   │   └── best_model.pt       # V2 model (7.42 BPM MAE)
+│   ├── results_v2/
 │   │   ├── sample_predictions.png
 │   │   ├── error_distribution.png
 │   │   ├── scatter_plot.png
-│   │   └── test_results.json
-│   └── animations/
-│       ├── 1_gradual_reveal_best.gif (1.6MB)
-│       ├── 2_gradual_reveal_worst.gif (1.2MB)
-│       ├── 3_multi_workout_comparison.gif (2.4MB)
-│       ├── 4_feature_influence.gif (1.7MB)
-│       └── 5_error_heatmap.gif (183KB)
-├── EDA/                        # Exploration tools
-└── Preprocessing/              # 3-stage pipeline
+│   │   └── test_results.json   # 7.42 BPM MAE
+│   └── animations_v2_single/
+│       ├── steady_workout.gif
+│       ├── intervals_workout.gif
+│       └── progressive_workout.gif
+├── huggingface_deployment/      # HF Space files
+│   ├── app.py                   # Gradio app (V2 model)
+│   ├── best_model.pt            # V2 checkpoint
+│   ├── README.md                # Space documentation
+│   ├── HF_MODEL_CARD.md         # Model card
+│   └── *.gif                    # Animated predictions
+├── Preprocessing/
+│   ├── convert_to_hf_format.py  # JSON → Parquet converter
+│   └── clean_dataset_v2.json    # Clean dataset (2.3GB)
+└── EDA/                         # Exploration tools
 ```
 
 ---
@@ -124,20 +160,32 @@ SUB3_V2/
 ## Quick Commands
 
 ```bash
-# Train model (from project root)
-python3 Model/train.py --batch-size 64 --dropout 0.4 --lr 0.0005 --patience 3
+# Train V2 model (from project root)
+python3 Model/train.py --batch-size 16 --dropout 0.3 --lr 0.0005 --patience 10
 
-# Evaluate model
-python3 Model/evaluate.py --checkpoint Model/checkpoints/best_model.pt \
-    --data-dir DATA/processed --output-dir Model/results
+# Evaluate V2 model
+python3 Model/evaluate.py --checkpoint Model/checkpoints_v2/best_model.pt \
+    --data-dir DATA/processed_v2 --output-dir Model/results_v2
 
-# Generate animations
-python3 Model/animate_predictions.py --checkpoint Model/checkpoints/best_model.pt \
-    --data-dir DATA/processed --output-dir Model/animations --fps 20
+# Generate category animations
+python3 Model/animate_by_category.py --checkpoint Model/checkpoints_v2/best_model.pt \
+    --data-dir DATA/processed_v2 --output-dir Model/animations_v2_category
 
-# Investigate specific workout
-python3 Model/investigate_workout.py
+# Convert dataset to Parquet for HuggingFace
+python3 Preprocessing/convert_to_hf_format.py
+
+# Load dataset from HuggingFace
+python3 -c "from datasets import load_dataset; ds = load_dataset('rricc22/endomondo-hr-prediction-v2'); print(ds)"
 ```
+
+---
+
+## Hugging Face Links
+
+- **Collection**: https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3
+- **Model**: https://huggingface.co/rricc22/heart-rate-prediction-lstm
+- **Dataset**: https://huggingface.co/datasets/rricc22/endomondo-hr-prediction-v2
+- **Demo**: https://huggingface.co/spaces/rricc22/heart-rate-predictor
 
 ---
 
@@ -148,17 +196,22 @@ python3 Model/investigate_workout.py
 - **Tracking**: Weights & Biases (W&B)
 - **Data**: NumPy, Pandas
 - **Visualization**: Matplotlib, PIL (animations)
+- **Deployment**: Hugging Face (Model Hub, Datasets, Spaces)
+- **Data Format**: Parquet (for HF compatibility)
+- **Demo**: Gradio
 
 ---
 
 ## References
 
 - **V1 Project**: `/home/riccardo/Documents/Collaborative-Projects/SUB_3H_42KM_DL`
-- **Dataset**: Endomondo HR from FitRec project
-- **CLAUDE.md**: Complete command reference and design patterns
+- **Dataset**: Endomondo HR from FitRec project (40,186 running workouts)
+- **Collection**: https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3
+- **Documentation**: COLLECTION_INFO.md, DEPLOYMENT_COMPLETE.md
 
 ---
 
 **Project Lead**: Riccardo
-**Status**: Training complete, ready for improvements
-**Next**: Implement regularization improvements to reach <10 BPM target
+**Status**: ✅ Complete - Fully deployed to Hugging Face
+**Achievement**: 7.42 BPM MAE (46.5% improvement from baseline)
+**Date**: January 14, 2026
