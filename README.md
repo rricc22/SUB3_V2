@@ -2,12 +2,11 @@
 
 **Version**: 2.0  
 **Goal**: Predict heart rate time-series from speed and altitude during running workouts  
-**Target**: Sub-3-hour marathon training optimization through personalized HR prediction
-**Status**: ✅ **COMPLETE - DEPLOYED TO HUGGING FACE**
+
 
 ---
 
-## 🎉 V2 Final Results
+## Final Results
 
 | Metric | V1 Baseline | V1 Best | V2 Final | Improvement |
 |--------|-------------|---------|----------|-------------|
@@ -16,11 +15,11 @@
 | **Features** | 3 | 3 | **14** | +367% |
 | **Dataset** | 974 | 974 | **40,186** | +4,027% |
 
-**🎯 TARGET ACHIEVED!** MAE < 10 BPM on base model (without personal finetuning)
+**TARGET ACHIEVED!** MAE < 10 BPM on base model (without personal finetuning)
 
 ---
 
-## 🚀 Quick Start - Use the Model
+## Quick Start - Use the Model
 
 ### Try the Interactive Demo
 **URL**: https://huggingface.co/spaces/rricc22/heart-rate-predictor
@@ -52,7 +51,7 @@ print(f"Type: {workout['workout_type']}, HR: {workout['hr_mean']:.1f} BPM")
 
 ---
 
-## 📦 Hugging Face Collection
+## Hugging Face Collection
 
 **Collection**: https://huggingface.co/collections/rricc22/heart-rate-prediction-from-running-data-6967bfe0851dd527480d6bd3
 
@@ -81,13 +80,13 @@ print(f"Type: {workout['workout_type']}, HR: {workout['hr_mean']:.1f} BPM")
 |-------|-------------|------------|----------|--------|
 | V1 LSTM Baseline | 2-layer LSTM (64 units) | ~50K | 13.88 BPM | Baseline |
 | V1 Finetuned Stage 1 | LSTM + Transfer Learning | ~50K | 8.94 BPM | Previous Best |
-| **V2 Final** | **2-layer LSTM (128 units, 14 features)** | **206K** | **7.42 BPM** | **✅ CURRENT BEST** |
+| **V2 Final** | **2-layer LSTM (128 units, 14 features)** | **206K** | **7.42 BPM** | **CURRENT BEST** |
 
 ---
 
 ## Why Version 2.0 Succeeded
 
-### Key Improvements ✅
+### Key Improvements 
 
 1. **14 Engineered Features** (was 3)
    - Added lag features (physiological delays)
